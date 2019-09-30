@@ -71,6 +71,10 @@ var std = New()
 
 type (
 	// Client defines a sreq client.
+	// sreq resets state except the HTTP client after each request.
+	// Dynamic changes of the HTTP client is not recommended. Don't do this unless absolutely necessary.
+	// In the meanwhile, you must specify the other client settings for each request if required,
+	// like method, url, params, headers, ctx, etc.
 	Client struct {
 		httpClient *http.Client
 		method     string
@@ -543,9 +547,11 @@ func (c *Client) Reset() {
 	c.params = make(Value)
 	c.form = make(Value)
 	c.json = make(Data)
+	c.host = ""
 	c.headers = make(Value)
 	c.cookies = nil
 	c.files = nil
+	c.ctx = nil
 
 	if c.withLock {
 		c.mux.Unlock()
@@ -710,14 +716,14 @@ func (c *Client) Send() *Response {
 	if len(c.params) != 0 {
 		c.addParams(httpReq)
 	}
+	if c.host != "" {
+		httpReq.Host = c.host
+	}
 	if len(c.headers) != 0 {
 		c.addHeaders(httpReq)
 	}
 	if len(c.cookies) != 0 {
 		c.addCookies(httpReq)
-	}
-	if c.host != "" {
-		httpReq.Host = c.host
 	}
 
 	c.Reset()
