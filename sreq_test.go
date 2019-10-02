@@ -8,49 +8,61 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	resp := sreq.Get("http://httpbin.org/get").Send().EnsureStatusOk()
+	resp := sreq.
+		Get("http://httpbin.org/get").
+		EnsureStatusOk()
 	if resp.Err != nil {
 		t.Error(resp.Err)
 	}
 }
 
 func TestHead(t *testing.T) {
-	resp := sreq.Head("http://httpbin.org").Send().EnsureStatusOk()
+	resp := sreq.
+		Head("http://httpbin.org").
+		EnsureStatusOk()
 	if resp.Err != nil {
 		t.Error(resp.Err)
 	}
 }
 
 func TestPost(t *testing.T) {
-	resp := sreq.Post("http://httpbin.org/post").Send().EnsureStatusOk()
+	resp := sreq.
+		Post("http://httpbin.org/post").
+		EnsureStatusOk()
 	if resp.Err != nil {
 		t.Error(resp.Err)
 	}
 }
 
 func TestPut(t *testing.T) {
-	resp := sreq.Put("http://httpbin.org/put").Send().EnsureStatusOk()
+	resp := sreq.
+		Put("http://httpbin.org/put").
+		EnsureStatusOk()
 	if resp.Err != nil {
 		t.Error(resp.Err)
 	}
 }
 
 func TestPatch(t *testing.T) {
-	resp := sreq.Patch("http://httpbin.org/patch").Send().EnsureStatusOk()
+	resp := sreq.
+		Patch("http://httpbin.org/patch").
+		EnsureStatusOk()
 	if resp.Err != nil {
 		t.Error(resp.Err)
 	}
 }
 
 func TestDelete(t *testing.T) {
-	resp := sreq.Delete("http://httpbin.org/delete").Send().EnsureStatusOk()
+	resp := sreq.
+		Delete("http://httpbin.org/delete").
+		EnsureStatusOk()
 	if resp.Err != nil {
 		t.Error(resp.Err)
 	}
 }
 
 func TestOptions(t *testing.T) {
-	resp := sreq.Options("http://httpbin.org").Send().EnsureStatusOk()
+	resp := sreq.Options("http://httpbin.org").EnsureStatusOk()
 	if resp.Err != nil {
 		t.Error(resp.Err)
 	}
@@ -60,13 +72,14 @@ func TestParams(t *testing.T) {
 	var data struct {
 		Args map[string]string `json:"args"`
 	}
-	err := sreq.Get("http://httpbin.org/get").
-		Params(
-			sreq.Value{
+
+	err := sreq.
+		Get("http://httpbin.org/get",
+			sreq.WithParams(sreq.Value{
 				"key1": "value1",
 				"key2": "value2",
-			}).
-		Send().
+			}),
+		).
 		EnsureStatusOk().
 		JSON(&data)
 	if err != nil {
@@ -81,13 +94,14 @@ func TestForm(t *testing.T) {
 	var data struct {
 		Form map[string]string `json:"form"`
 	}
-	err := sreq.Post("http://httpbin.org/post").
-		Form(
-			sreq.Value{
+
+	err := sreq.
+		Post("http://httpbin.org/post",
+			sreq.WithForm(sreq.Value{
 				"key1": "value1",
 				"key2": "value2",
-			}).
-		Send().
+			}),
+		).
 		EnsureStatusOk().
 		JSON(&data)
 	if err != nil {
@@ -105,13 +119,14 @@ func TestJSON(t *testing.T) {
 			Num int    `json:"num"`
 		} `json:"json"`
 	}
-	err := sreq.Post("http://httpbin.org/post").
-		JSON(
-			sreq.Data{
+
+	err := sreq.
+		Post("http://httpbin.org/post",
+			sreq.WithJSON(sreq.Data{
 				"msg": "hello world",
 				"num": 2019,
-			}).
-		Send().
+			}),
+		).
 		EnsureStatusOk().
 		JSON(&data)
 	if err != nil {
@@ -126,13 +141,14 @@ func TestHeaders(t *testing.T) {
 	var data struct {
 		Headers map[string]string `json:"headers"`
 	}
-	err := sreq.Get("http://httpbin.org/get").
-		Headers(
-			sreq.Value{
+
+	err := sreq.
+		Get("http://httpbin.org/get",
+			sreq.WithHeaders(sreq.Value{
 				"Origin":  "http://httpbin.org",
 				"Referer": "http://httpbin.org",
-			}).
-		Send().
+			}),
+		).
 		EnsureStatusOk().
 		JSON(&data)
 	if err != nil {
@@ -147,18 +163,20 @@ func TestCookies(t *testing.T) {
 	var data struct {
 		Cookies map[string]string `json:"cookies"`
 	}
-	err := sreq.Get("http://httpbin.org/cookies/set").
-		Cookies(
-			&http.Cookie{
-				Name:  "name1",
-				Value: "value1",
-			},
-			&http.Cookie{
-				Name:  "name2",
-				Value: "value2",
-			},
+
+	err := sreq.
+		Get("http://httpbin.org/cookies/set",
+			sreq.WithCookies(
+				&http.Cookie{
+					Name:  "name1",
+					Value: "value1",
+				},
+				&http.Cookie{
+					Name:  "name2",
+					Value: "value2",
+				},
+			),
 		).
-		Send().
 		EnsureStatusOk().
 		JSON(&data)
 	if err != nil {
@@ -171,43 +189,45 @@ func TestCookies(t *testing.T) {
 
 // TODO: This test case usually goes wrong while running "go test -v ." for a batch of tests.
 //  It may work with "go test -v -p=1 .", need to find out the reason.
-// func TestFiles(t *testing.T) {
-// 	var data struct {
-// 		Files map[string]string `json:"files"`
-// 	}
-// 	err := grequests.New().Post("http://httpbin.org/post").
-// 		Files(
-// 			&grequests.File{
-// 				FieldName: "testfile1",
-// 				FileName:  "testfile1.txt",
-// 				FilePath:  "./testdata/testfile1.txt",
-// 			},
-// 			&grequests.File{
-// 				FieldName: "testfile2",
-// 				FileName:  "testfile2.txt",
-// 				FilePath:  "./testdata/testfile2.txt",
-// 			},
-// 		).
-// 		Send().
-// 		EnsureStatusOk().
-// 		JSON(&data)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-//
-// 	if data.Files["testfile1"] == "" || data.Files["testfile2"] == "" {
-// 		t.Error("Send files failed")
-// 	}
-// }
+func TestFiles(t *testing.T) {
+	var data struct {
+		Files map[string]string `json:"files"`
+	}
+	err := sreq.
+		Post("http://httpbin.org/post",
+			sreq.WithFiles(
+				&sreq.File{
+					FieldName: "testfile1",
+					FileName:  "testfile1.txt",
+					FilePath:  "./testdata/testfile1.txt",
+				},
+				&sreq.File{
+					FieldName: "testfile2",
+					FileName:  "testfile2.txt",
+					FilePath:  "./testdata/testfile2.txt",
+				},
+			),
+		).
+		EnsureStatusOk().
+		JSON(&data)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if data.Files["testfile1"] == "" || data.Files["testfile2"] == "" {
+		t.Error("Send files failed")
+	}
+}
 
 func TestBasicAuth(t *testing.T) {
 	var data struct {
 		Authenticated bool   `json:"authenticated"`
 		User          string `json:"user"`
 	}
-	err := sreq.Get("http://httpbin.org/basic-auth/admin/pass").
-		BasicAuth("admin", "pass").
-		Send().
+	err := sreq.
+		Get("http://httpbin.org/basic-auth/admin/pass",
+			sreq.WithBasicAuth("admin", "pass"),
+		).
 		EnsureStatusOk().
 		JSON(&data)
 	if err != nil {
@@ -223,9 +243,10 @@ func TestBearerToken(t *testing.T) {
 		Authenticated bool   `json:"authenticated"`
 		Token         string `json:"token"`
 	}
-	err := sreq.Get("http://httpbin.org/bearer").
-		BearerToken("sreq").
-		Send().
+	err := sreq.
+		Get("http://httpbin.org/bearer",
+			sreq.WithBearerToken("sreq"),
+		).
 		EnsureStatusOk().
 		JSON(&data)
 	if err != nil {

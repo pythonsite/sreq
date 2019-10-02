@@ -21,19 +21,19 @@ func main() {
 	// setFilesPayload()
 	// setBasicAuth()
 	// setBearerToken()
+	setDefaultOpts()
 	// customizeHTTPClient()
-	// setProxy()
 	// concurrentSafe()
 }
 
 func setParams() {
 	data, err := sreq.
-		Get("http://httpbin.org/get").
-		Params(sreq.Value{
-			"key1": "value1",
-			"key2": "value2",
-		}).
-		Send().
+		Get("http://httpbin.org/get",
+			sreq.WithParams(sreq.Value{
+				"key1": "value1",
+				"key2": "value2",
+			}),
+		).
 		Text()
 	if err != nil {
 		panic(err)
@@ -43,12 +43,12 @@ func setParams() {
 
 func setHeaders() {
 	data, err := sreq.
-		Get("http://httpbin.org/get").
-		Headers(sreq.Value{
-			"Origin":  "http://httpbin.org",
-			"Referer": "http://httpbin.org",
-		}).
-		Send().
+		Get("http://httpbin.org/get",
+			sreq.WithHeaders(sreq.Value{
+				"Origin":  "http://httpbin.org",
+				"Referer": "http://httpbin.org",
+			}),
+		).
 		Text()
 	if err != nil {
 		panic(err)
@@ -58,18 +58,18 @@ func setHeaders() {
 
 func setCookies() {
 	data, err := sreq.
-		Get("http://httpbin.org/cookies/set").
-		Cookies(
-			&http.Cookie{
-				Name:  "name1",
-				Value: "value1",
-			},
-			&http.Cookie{
-				Name:  "name2",
-				Value: "value2",
-			},
+		Get("http://httpbin.org/cookies/set",
+			sreq.WithCookies(
+				&http.Cookie{
+					Name:  "name1",
+					Value: "value1",
+				},
+				&http.Cookie{
+					Name:  "name2",
+					Value: "value2",
+				},
+			),
 		).
-		Send().
 		Text()
 	if err != nil {
 		panic(err)
@@ -79,12 +79,12 @@ func setCookies() {
 
 func setFormPayload() {
 	data, err := sreq.
-		Post("http://httpbin.org/post").
-		Form(sreq.Value{
-			"key1": "value1",
-			"key2": "value2",
-		}).
-		Send().
+		Post("http://httpbin.org/post",
+			sreq.WithForm(sreq.Value{
+				"key1": "value1",
+				"key2": "value2",
+			}),
+		).
 		Text()
 	if err != nil {
 		panic(err)
@@ -94,12 +94,12 @@ func setFormPayload() {
 
 func setJSONPayload() {
 	data, err := sreq.
-		Post("http://httpbin.org/post").
-		JSON(sreq.Data{
-			"msg": "hello world",
-			"num": 2019,
-		}).
-		Send().
+		Post("http://httpbin.org/post",
+			sreq.WithJSON(sreq.Data{
+				"msg": "hello world",
+				"num": 2019,
+			}),
+		).
 		Text()
 	if err != nil {
 		panic(err)
@@ -109,8 +109,7 @@ func setJSONPayload() {
 
 func setFilesPayload() {
 	data, err := sreq.
-		Post("http://httpbin.org/post").
-		Files(
+		Post("http://httpbin.org/post", sreq.WithFiles(
 			&sreq.File{
 				FieldName: "testimage1",
 				FileName:  "testimage1.jpg",
@@ -121,8 +120,7 @@ func setFilesPayload() {
 				FileName:  "testimage2.jpg",
 				FilePath:  "./testdata/testimage2.jpg",
 			},
-		).
-		Send().
+		)).
 		Text()
 	if err != nil {
 		panic(err)
@@ -132,9 +130,9 @@ func setFilesPayload() {
 
 func setBasicAuth() {
 	data, err := sreq.
-		Get("http://httpbin.org/basic-auth/admin/pass").
-		BasicAuth("admin", "pass").
-		Send().
+		Get("http://httpbin.org/basic-auth/admin/pass",
+			sreq.WithBasicAuth("admin", "pass"),
+		).
 		Text()
 	if err != nil {
 		panic(err)
@@ -144,9 +142,44 @@ func setBasicAuth() {
 
 func setBearerToken() {
 	data, err := sreq.
-		Get("http://httpbin.org/bearer").
-		BearerToken("grequests").
-		Send().
+		Get("http://httpbin.org/bearer",
+			sreq.WithBearerToken("sreq"),
+		).
+		Text()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(data)
+}
+
+func setDefaultOpts() {
+	req := sreq.New(nil,
+		sreq.WithParams(sreq.Value{
+			"defaultKey1": "defaultValue1",
+			"defaultKey2": "defaultValue2",
+		}),
+	)
+
+	data, err := req.
+		Get("http://httpbin.org/get",
+			sreq.WithParams(sreq.Value{
+				"key1": "value1",
+				"key2": "value2",
+			}),
+		).
+		Text()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(data)
+
+	data, err = req.
+		Get("http://httpbin.org/get",
+			sreq.WithParams(sreq.Value{
+				"key3": "value3",
+				"key4": "value4",
+			}),
+		).
 		Text()
 	if err != nil {
 		panic(err)
@@ -180,22 +213,10 @@ func customizeHTTPClient() {
 		Jar:           jar,
 		Timeout:       timeout,
 	}
-	data, err := sreq.
-		WithHTTPClient(httpClient).
-		Get("http://httpbin.org/get").
-		Send().
-		Text()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(data)
-}
 
-func setProxy() {
-	data, err := sreq.
-		WithProxy("http://127.0.0.1:1081").
+	req := sreq.New(httpClient)
+	data, err := req.
 		Get("http://httpbin.org/get").
-		Send().
 		Text()
 	if err != nil {
 		panic(err)
@@ -207,7 +228,7 @@ func concurrentSafe() {
 	const MaxWorker = 1000
 	wg := new(sync.WaitGroup)
 
-	for i := 0; i < MaxWorker; i += 1 {
+	for i := 0; i < MaxWorker; i++ {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
@@ -216,10 +237,9 @@ func concurrentSafe() {
 			params.Set(fmt.Sprintf("key%d", i), fmt.Sprintf("value%d", i))
 
 			data, err := sreq.
-				AcquireLock().
-				Get("http://httpbin.org/get").
-				Params(params).
-				Send().
+				Get("http://httpbin.org/get",
+					sreq.WithParams(params),
+				).
 				Text()
 			if err != nil {
 				return

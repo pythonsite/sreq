@@ -1,7 +1,11 @@
 # sreq
-A simple and user-friendly HTTP request library for Go, "s" means simple.
+A simple, user-friendly and thread-safe HTTP request library for Go, "s" means simple.
 
 [![Build Status](https://travis-ci.org/winterssy/sreq.svg?branch=master)](https://travis-ci.org/winterssy/sreq) [![Go Report Card](https://goreportcard.com/badge/github.com/winterssy/sreq)](https://goreportcard.com/report/github.com/winterssy/sreq) [![GoDoc](https://godoc.org/github.com/winterssy/sreq?status.svg)](https://godoc.org/github.com/winterssy/sreq) [![License](https://img.shields.io/github/license/winterssy/sreq.svg)](LICENSE)
+
+## Notices
+
+`sreq` now is under alpha test, its design and APIs might change in future. **It's not recommended to use in production unless you really know how to fix the potential bugs.**
 
 ## Features
 
@@ -9,10 +13,8 @@ A simple and user-friendly HTTP request library for Go, "s" means simple.
 - Easy set query params, headers and cookies.
 - Easy send form, JSON or files payload.
 - Easy set basic authentication or bearer token.
-- Easy customize root certificate authorities and client certificates.
-- Easy set proxy.
 - Automatic cookies management.
-- Customize HTTP client, transport, redirect policy, cookie jar and timeout.
+- Customize HTTP client.
 - Easy set context.
 - Easy decode responses, raw data, text representation and unmarshal the JSON-encoded data.
 - Concurrent safe.
@@ -39,20 +41,20 @@ import "github.com/winterssy/sreq"
 - [Set Files Payload](#Set-Files-Payload)
 - [Set Basic Authentication](#Set-Basic-Authentication)
 - [Set Bearer Token](#Set-Bearer-Token)
+- [Set Default HTTP Request Options](#Set-Default-HTTP-Request-Options)
 - [Customize HTTP Client](#Customize-HTTP-Client)
-- [Set Proxy](#Set-Proxy)
 - [Concurrent Safe](#Concurrent-Safe)
 
 ### Set Params
 
 ```go
 data, err := sreq.
-    Get("http://httpbin.org/get").
-    Params(sreq.Value{
-        "key1": "value1",
-        "key2": "value2",
-    }).
-    Send().
+    Get("http://httpbin.org/get",
+        sreq.WithParams(sreq.Value{
+            "key1": "value1",
+            "key2": "value2",
+        }),
+       ).
     Text()
 if err != nil {
     panic(err)
@@ -64,12 +66,12 @@ fmt.Println(data)
 
 ```go
 data, err := sreq.
-    Get("http://httpbin.org/get").
-    Headers(sreq.Value{
-        "Origin":  "http://httpbin.org",
-        "Referer": "http://httpbin.org",
-    }).
-    Send().
+    Get("http://httpbin.org/get",
+        sreq.WithHeaders(sreq.Value{
+            "Origin":  "http://httpbin.org",
+            "Referer": "http://httpbin.org",
+        }),
+       ).
     Text()
 if err != nil {
     panic(err)
@@ -81,18 +83,18 @@ fmt.Println(data)
 
 ```go
 data, err := sreq.
-    Get("http://httpbin.org/cookies/set").
-    Cookies(
-        &http.Cookie{
-            Name:  "name1",
-            Value: "value1",
-        },
-        &http.Cookie{
-            Name:  "name2",
-            Value: "value2",
-        },
-    ).
-    Send().
+    Get("http://httpbin.org/cookies/set",
+        sreq.WithCookies(
+            &http.Cookie{
+                Name:  "name1",
+                Value: "value1",
+            },
+            &http.Cookie{
+                Name:  "name2",
+                Value: "value2",
+            },
+        ),
+       ).
     Text()
 if err != nil {
     panic(err)
@@ -104,12 +106,12 @@ fmt.Println(data)
 
 ```go
 data, err := sreq.
-    Post("http://httpbin.org/post").
-    Form(sreq.Value{
-        "key1": "value1",
-        "key2": "value2",
-    }).
-    Send().
+    Post("http://httpbin.org/post",
+         sreq.WithForm(sreq.Value{
+             "key1": "value1",
+             "key2": "value2",
+         }),
+        ).
     Text()
 if err != nil {
     panic(err)
@@ -138,8 +140,7 @@ fmt.Println(data)
 
 ```go
 data, err := sreq.
-    Post("http://httpbin.org/post").
-    Files(
+    Post("http://httpbin.org/post", sreq.WithFiles(
         &sreq.File{
             FieldName: "testimage1",
             FileName:  "testimage1.jpg",
@@ -150,8 +151,7 @@ data, err := sreq.
             FileName:  "testimage2.jpg",
             FilePath:  "./testdata/testimage2.jpg",
         },
-    ).
-    Send().
+    )).
     Text()
 if err != nil {
     panic(err)
@@ -163,9 +163,9 @@ fmt.Println(data)
 
 ```go
 data, err := sreq.
-    Get("http://httpbin.org/basic-auth/admin/pass").
-    BasicAuth("admin", "pass").
-    Send().
+    Get("http://httpbin.org/basic-auth/admin/pass",
+        sreq.WithBasicAuth("admin", "pass"),
+       ).
     Text()
 if err != nil {
     panic(err)
@@ -177,9 +177,48 @@ fmt.Println(data)
 
 ```go
 data, err := sreq.
-    Get("http://httpbin.org/bearer").
-    BearerToken("sreq").
-    Send().
+    Get("http://httpbin.org/bearer",
+        sreq.WithBearerToken("sreq"),
+       ).
+    Text()
+if err != nil {
+    panic(err)
+}
+fmt.Println(data)
+```
+
+## Set Default HTTP Request Options
+
+If you want to set default HTTP request options for per request, you can construct a custom `sreq` client and pass the default options.
+
+```go
+req := sreq.New(nil,
+	sreq.WithParams(sreq.Value{
+		"defaultKey1": "defaultValue1",
+		"defaultKey2": "defaultValue2",
+	}),
+)
+
+data, err := req.
+    Get("http://httpbin.org/get",
+        sreq.WithParams(sreq.Value{
+            "key1": "value1",
+            "key2": "value2",
+        }),
+       ).
+    Text()
+if err != nil {
+    panic(err)
+}
+fmt.Println(data)
+
+data, err = req.
+    Get("http://httpbin.org/get",
+        sreq.WithParams(sreq.Value{
+            "key3": "value3",
+            "key4": "value4",
+        }),
+       ).
     Text()
 if err != nil {
     panic(err)
@@ -188,6 +227,8 @@ fmt.Println(data)
 ```
 
 ### Customize HTTP Client
+
+For some reason, `sreq` does not provide direct APIs for setting transport, redirection policy, cookie jar, timeout, proxy or something else can be set by constructing a `*http.Client` .  Construct a custom `sreq` client if you want to do so.
 
 ```go
 transport := &http.Transport{
@@ -215,24 +256,10 @@ httpClient := &http.Client{
     Jar:           jar,
     Timeout:       timeout,
 }
-data, err := sreq.
-    WithHTTPClient(httpClient).
-    Get("http://httpbin.org/get").
-    Send().
-    Text()
-if err != nil {
-    panic(err)
-}
-fmt.Println(data)
-```
 
-### Set Proxy
-
-```go
-data, err := sreq.
-    WithProxy("http://127.0.0.1:1081").
+req := sreq.New(httpClient)
+data, err := req.
     Get("http://httpbin.org/get").
-    Send().
     Text()
 if err != nil {
     panic(err)
@@ -242,13 +269,13 @@ fmt.Println(data)
 
 ### Concurrent Safe
 
-Use sreq across goroutines you must call `AcquireLock` for each request in the beginning, otherwise might cause data race. **Don't forget it!**
+`sreq` is thread-safe, you can easily use `sreq` across goroutines.
 
 ```go
 const MaxWorker = 1000
 wg := new(sync.WaitGroup)
 
-for i := 0; i < MaxWorker; i += 1 {
+for i := 0; i < MaxWorker; i++ {
     wg.Add(1)
     go func(i int) {
         defer wg.Done()
@@ -257,10 +284,9 @@ for i := 0; i < MaxWorker; i += 1 {
         params.Set(fmt.Sprintf("key%d", i), fmt.Sprintf("value%d", i))
 
         data, err := sreq.
-            AcquireLock().
-            Get("http://httpbin.org/get").
-            Params(params).
-            Send().
+            Get("http://httpbin.org/get",
+                sreq.WithParams(params),
+               ).
             Text()
         if err != nil {
             return
@@ -276,9 +302,3 @@ wg.Wait()
 ## License
 
 MIT.
-
-## Thanks
-
-- [xuanbo/requests](https://github.com/xuanbo/requests)
-- [ddliu/go-httpclient](https://github.com/ddliu/go-httpclient)
-- [go-resty/resty](https://github.com/go-resty/resty)
