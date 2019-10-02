@@ -241,7 +241,7 @@ fmt.Println(data)
 
 ### Customize HTTP Client
 
-For some reason, sreq does not provide direct APIs for setting transport, redirection policy, cookie jar, timeout, proxy or something else can be set by constructing a `*http.Client` .  Construct a custom sreq client if you want to do so.
+For some reasons, sreq does not provide direct APIs for setting transport, redirection policy, cookie jar, timeout, proxy or something else can be set by constructing a `*http.Client`. Construct a custom sreq client if you want to do so.
 
 ```go
 transport := &http.Transport{
