@@ -4,11 +4,7 @@ A simple, user-friendly and concurrent safe HTTP request library for Go, 's' mea
 
 - [简体中文](README_CN.md)
 
-[![Build Status](https://travis-ci.org/winterssy/sreq.svg?branch=master)](https://travis-ci.org/winterssy/sreq) [![Go Report Card](https://goreportcard.com/badge/github.com/winterssy/sreq)](https://goreportcard.com/report/github.com/winterssy/sreq) [![GoDoc](https://godoc.org/github.com/winterssy/sreq?status.svg)](https://godoc.org/github.com/winterssy/sreq) [![License](https://img.shields.io/github/license/winterssy/sreq.svg)](LICENSE)
-
-## Notices
-
-sreq now is under alpha test, its design and APIs might change in future. **It's not recommended to use in production unless you really know how to fix the potential bugs.**
+[![Build Status](https://travis-ci.org/winterssy/sreq.svg?branch=master)](https://travis-ci.org/winterssy/sreq) [![codecov](https://codecov.io/gh/winterssy/sreq/branch/master/graph/badge.svg)](https://codecov.io/gh/winterssy/sreq) [![Go Report Card](https://goreportcard.com/badge/github.com/winterssy/sreq)](https://goreportcard.com/report/github.com/winterssy/sreq) [![GoDoc](https://godoc.org/github.com/winterssy/sreq?status.svg)](https://godoc.org/github.com/winterssy/sreq) [![License](https://img.shields.io/github/license/winterssy/sreq.svg)](LICENSE)
 
 ## Features
 
@@ -35,6 +31,20 @@ import "github.com/winterssy/sreq"
 ```
 
 ## Examples
+
+sreq's usages are very similar to net/http library, you can switch from it to sreq easily. For example, if your HTTP request code like this:
+
+```go
+resp, err := http.Get("http://www.google.com")
+```
+
+Use sreq you can change your code like this:
+
+```go
+resp, err := sreq.Get("http://www.google.com").Resolve()
+```
+
+See more examples as follow.
 
 - [Set Params](#Set-Params)
 - [Set Headers](#Set-Headers)

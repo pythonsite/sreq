@@ -4,11 +4,7 @@
 
 - [English](README.md)
 
-[![Build Status](https://travis-ci.org/winterssy/sreq.svg?branch=master)](https://travis-ci.org/winterssy/sreq) [![Go Report Card](https://goreportcard.com/badge/github.com/winterssy/sreq)](https://goreportcard.com/report/github.com/winterssy/sreq) [![GoDoc](https://godoc.org/github.com/winterssy/sreq?status.svg)](https://godoc.org/github.com/winterssy/sreq) [![License](https://img.shields.io/github/license/winterssy/sreq.svg)](LICENSE)
-
-## 注意
-
-sreq目前处于alpha测试阶段，它的设计和API在后续可能发生变更。**在你不确定当库出现bug时能否自行解决的情况下，切勿在生产环境使用sreq。**
+[![Build Status](https://travis-ci.org/winterssy/sreq.svg?branch=master)](https://travis-ci.org/winterssy/sreq) [![codecov](https://codecov.io/gh/winterssy/sreq/branch/master/graph/badge.svg)](https://codecov.io/gh/winterssy/sreq) [![Go Report Card](https://goreportcard.com/badge/github.com/winterssy/sreq)](https://goreportcard.com/report/github.com/winterssy/sreq) [![GoDoc](https://godoc.org/github.com/winterssy/sreq?status.svg)](https://godoc.org/github.com/winterssy/sreq) [![License](https://img.shields.io/github/license/winterssy/sreq.svg)](LICENSE)
 
 ## 功能
 
@@ -35,6 +31,20 @@ import "github.com/winterssy/sreq"
 ```
 
 ## 例子
+
+sreq发送请求跟基础库net/http非常像，你可以无缝切换。举个栗子，如果你之前的请求是这样的：
+
+```go
+resp, err := http.Get("http://www.baidu.com")
+```
+
+使用sreq你只须这样：
+
+```go
+resp, err := sreq.Get("http://www.baidu.com").Resolve()
+```
+
+更多的示例：
 
 - [设置参数](#设置参数)
 - [设置请求头](#设置请求头)
@@ -304,4 +314,4 @@ wg.Wait()
 
 ## 许可证
 
-MIT.
+MIT。
