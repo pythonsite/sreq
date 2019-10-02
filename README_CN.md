@@ -1,6 +1,6 @@
 # sreq
 
-一个简单，易用和线程安全的Golang网络请求库，‘s‘ 意指简单。
+一个简单，易用和线程安全的Golang网络请求库，‘s’ 意指简单。
 
 - [English](README.md)
 
