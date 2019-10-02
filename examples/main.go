@@ -13,17 +13,17 @@ import (
 )
 
 func main() {
-	// setParams()
-	// setHeaders()
-	// setCookies()
-	// setFormPayload()
-	// setJSONPayload()
-	// setFilesPayload()
-	// setBasicAuth()
-	// setBearerToken()
+	setParams()
+	setHeaders()
+	setCookies()
+	sendForm()
+	sendJSON()
+	uploadFiles()
+	setBasicAuth()
+	setBearerToken()
 	setDefaultOpts()
-	// customizeHTTPClient()
-	// concurrentSafe()
+	customizeHTTPClient()
+	concurrentSafe()
 }
 
 func setParams() {
@@ -77,7 +77,7 @@ func setCookies() {
 	fmt.Println(data)
 }
 
-func setFormPayload() {
+func sendForm() {
 	data, err := sreq.
 		Post("http://httpbin.org/post",
 			sreq.WithForm(sreq.Value{
@@ -92,7 +92,7 @@ func setFormPayload() {
 	fmt.Println(data)
 }
 
-func setJSONPayload() {
+func sendJSON() {
 	data, err := sreq.
 		Post("http://httpbin.org/post",
 			sreq.WithJSON(sreq.Data{
@@ -107,7 +107,7 @@ func setJSONPayload() {
 	fmt.Println(data)
 }
 
-func setFilesPayload() {
+func uploadFiles() {
 	data, err := sreq.
 		Post("http://httpbin.org/post", sreq.WithFiles(
 			&sreq.File{

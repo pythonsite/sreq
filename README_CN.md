@@ -1,54 +1,54 @@
 # sreq
 
-A simple, user-friendly and thread-safe HTTP request library for Go, 's' means simple.
+一个简单，易用和线程安全的Golang网络请求库，‘s‘ 意指简单。
 
-- [简体中文](README_CN.md)
+- [English](README.md)
 
 [![Build Status](https://travis-ci.org/winterssy/sreq.svg?branch=master)](https://travis-ci.org/winterssy/sreq) [![Go Report Card](https://goreportcard.com/badge/github.com/winterssy/sreq)](https://goreportcard.com/report/github.com/winterssy/sreq) [![GoDoc](https://godoc.org/github.com/winterssy/sreq?status.svg)](https://godoc.org/github.com/winterssy/sreq) [![License](https://img.shields.io/github/license/winterssy/sreq.svg)](LICENSE)
 
-## Notices
+## 注意
 
-sreq now is under alpha test, its design and APIs might change in future. **It's not recommended to use in production unless you really know how to fix the potential bugs.**
+sreq目前处于alpha测试阶段，它的设计和API在后续可能发生变更。**在你不确定当库出现bug时能否自行解决的情况下，切勿在生产环境使用sreq。**
 
-## Features
+## 功能
 
-- GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, etc.
-- Easy set query params, headers and cookies.
-- Easy send form, JSON or files payload.
-- Easy set basic authentication or bearer token.
-- Automatic cookies management.
-- Customize HTTP client.
-- Easy set context.
-- Easy decode responses, raw data, text representation and unmarshal the JSON-encoded data.
-- Concurrent safe.
+- 简便地发送GET/HEAD/POST/PUT/PATCH/DELETE/OPTIONS等HTTP请求。
+- 简便地设置参数，请求头，或者Cookies。
+- 简便地发送Form表单，JSON数据，或者上传文件。
+- 简便地设置Basic认证，Bearer令牌。
+- 自动管理Cookies。
+- 自定义HTTP客户端。
+- 简便地设置请求上下文。
+- 简便地对响应解码，输出字节码，字符串，或者对JSON反序列化。
+- 并发安全。
 
-## Install
+## 安装
 
 ```sh
 go get -u github.com/winterssy/sreq
 ```
 
-## Usage
+## 使用
 
 ```go
 import "github.com/winterssy/sreq"
 ```
 
-## Examples
+## 例子
 
-- [Set Params](#Set-Params)
-- [Set Headers](#Set-Headers)
-- [Set Cookies](#Set-Cookies)
-- [Send Form](#Send-Form)
-- [Send JSON](#Send-JSON)
-- [Upload Files](#Upload-Files)
-- [Set Basic Authentication](#Set-Basic-Authentication)
-- [Set Bearer Token](#Set-Bearer-Token)
-- [Set Default HTTP Request Options](#Set-Default-HTTP-Request-Options)
-- [Customize HTTP Client](#Customize-HTTP-Client)
-- [Concurrent Safe](#Concurrent-Safe)
+- [设置参数](#设置参数)
+- [设置请求头](#设置请求头)
+- [设置Cookies](#设置Cookies)
+- [发送Form表单](#发送Form表单)
+- [发送JSON数据](#发送JSON数据)
+- [上传文件](#上传文件)
+- [设置Basic认证](#设置Basic认证)
+- [设置Bearer令牌](#设置Bearer令牌)
+- [设置默认请求选项](#设置默认请求选项)
+- [自定义HTTP客户端](#自定义HTTP客户端)
+- [并发安全](#并发安全)
 
-### Set Params
+### 设置参数
 
 ```go
 data, err := sreq.
@@ -65,7 +65,7 @@ if err != nil {
 fmt.Println(data)
 ```
 
-### Set Headers
+### 设置请求头
 
 ```go
 data, err := sreq.
@@ -82,7 +82,7 @@ if err != nil {
 fmt.Println(data)
 ```
 
-### Set Cookies
+### 设置Cookies
 
 ```go
 data, err := sreq.
@@ -105,7 +105,7 @@ if err != nil {
 fmt.Println(data)
 ```
 
-### Send Form
+### 发送Form表单
 
 ```go
 data, err := sreq.
@@ -122,7 +122,7 @@ if err != nil {
 fmt.Println(data)
 ```
 
-### Send JSON
+### 发送JSON数据
 
 ```go
 data, err := sreq.
@@ -139,7 +139,7 @@ if err != nil {
 fmt.Println(data)
 ```
 
-### Upload Files
+### 上传文件
 
 ```go
 data, err := sreq.
@@ -162,7 +162,7 @@ if err != nil {
 fmt.Println(data)
 ```
 
-### Set Basic Authentication
+### 设置Basic认证
 
 ```go
 data, err := sreq.
@@ -176,7 +176,7 @@ if err != nil {
 fmt.Println(data)
 ```
 
-### Set Bearer Token
+### 设置Bearer令牌
 
 ```go
 data, err := sreq.
@@ -190,9 +190,9 @@ if err != nil {
 fmt.Println(data)
 ```
 
-## Set Default HTTP Request Options
+## 设置默认请求选项
 
-If you want to set default HTTP request options for per request, you can construct a custom sreq client and pass the default options.
+如果你希望每个HTTP请求都带上一些默认选项，可以通过自定义sreq客户端实现。
 
 ```go
 req := sreq.New(nil,
@@ -229,9 +229,9 @@ if err != nil {
 fmt.Println(data)
 ```
 
-### Customize HTTP Client
+### 自定义HTTP客户端
 
-For some reason, sreq does not provide direct APIs for setting transport, redirection policy, cookie jar, timeout, proxy or something else can be set by constructing a `*http.Client` .  Construct a custom sreq client if you want to do so.
+sreq没有提供直接修改传输层、重定向策略、cookie jar、超时、代理或者其它能通过构造 `*http.Client` 实现配置的API，你可以通过自定义sreq客户端来设置它们。
 
 ```go
 transport := &http.Transport{
@@ -270,9 +270,9 @@ if err != nil {
 fmt.Println(data)
 ```
 
-### Concurrent Safe
+### 并发安全
 
-sreq is thread-safe, you can easily use it across goroutines.
+sreq是线程安全的，你可以无障碍地在goroutines中使用它。
 
 ```go
 const MaxWorker = 1000
@@ -302,6 +302,6 @@ for i := 0; i < MaxWorker; i++ {
 wg.Wait()
 ```
 
-## License
+## 许可证
 
 MIT.

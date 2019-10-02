@@ -68,7 +68,7 @@ func TestOptions(t *testing.T) {
 	}
 }
 
-func TestParams(t *testing.T) {
+func TestWithParams(t *testing.T) {
 	var data struct {
 		Args map[string]string `json:"args"`
 	}
@@ -90,7 +90,7 @@ func TestParams(t *testing.T) {
 	}
 }
 
-func TestForm(t *testing.T) {
+func TestWithForm(t *testing.T) {
 	var data struct {
 		Form map[string]string `json:"form"`
 	}
@@ -112,7 +112,7 @@ func TestForm(t *testing.T) {
 	}
 }
 
-func TestJSON(t *testing.T) {
+func TestWithJSON(t *testing.T) {
 	var data struct {
 		JSON struct {
 			Msg string `json:"msg"`
@@ -137,7 +137,7 @@ func TestJSON(t *testing.T) {
 	}
 }
 
-func TestHeaders(t *testing.T) {
+func TestWithHeaders(t *testing.T) {
 	var data struct {
 		Headers map[string]string `json:"headers"`
 	}
@@ -159,7 +159,7 @@ func TestHeaders(t *testing.T) {
 	}
 }
 
-func TestCookies(t *testing.T) {
+func TestWithCookies(t *testing.T) {
 	var data struct {
 		Cookies map[string]string `json:"cookies"`
 	}
@@ -187,9 +187,7 @@ func TestCookies(t *testing.T) {
 	}
 }
 
-// TODO: This test case usually goes wrong while running "go test -v ." for a batch of tests.
-//  It may work with "go test -v -p=1 .", need to find out the reason.
-func TestFiles(t *testing.T) {
+func TestWithFiles(t *testing.T) {
 	var data struct {
 		Files map[string]string `json:"files"`
 	}
@@ -219,7 +217,7 @@ func TestFiles(t *testing.T) {
 	}
 }
 
-func TestBasicAuth(t *testing.T) {
+func TestWithBasicAuth(t *testing.T) {
 	var data struct {
 		Authenticated bool   `json:"authenticated"`
 		User          string `json:"user"`
@@ -238,7 +236,7 @@ func TestBasicAuth(t *testing.T) {
 	}
 }
 
-func TestBearerToken(t *testing.T) {
+func TestWithBearerToken(t *testing.T) {
 	var data struct {
 		Authenticated bool   `json:"authenticated"`
 		Token         string `json:"token"`
