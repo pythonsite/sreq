@@ -13,17 +13,17 @@ import (
 )
 
 func main() {
-	setParams()
-	setHeaders()
-	setCookies()
-	sendForm()
-	sendJSON()
-	uploadFiles()
-	setBasicAuth()
-	setBearerToken()
-	setDefaultOpts()
-	customizeHTTPClient()
-	concurrentSafe()
+	// setParams()
+	// setHeaders()
+	// setCookies()
+	// sendForm()
+	// sendJSON()
+	// uploadFiles()
+	// setBasicAuth()
+	// setBearerToken()
+	// setDefaultOpts()
+	// customizeHTTPClient()
+	// concurrentSafe()
 }
 
 func setParams() {

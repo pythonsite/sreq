@@ -1,6 +1,6 @@
 # sreq
 
-A simple, user-friendly and thread-safe HTTP request library for Go, 's' means simple.
+A simple, user-friendly and concurrent safe HTTP request library for Go, 's' means simple.
 
 - [简体中文](README_CN.md)
 
@@ -272,7 +272,7 @@ fmt.Println(data)
 
 ### Concurrent Safe
 
-sreq is thread-safe, you can easily use it across goroutines.
+sreq is concurrent safe, you can easily use it across goroutines.
 
 ```go
 const MaxWorker = 1000
