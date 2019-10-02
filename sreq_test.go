@@ -1,78 +1,230 @@
 package sreq_test
 
 import (
+	"context"
+	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/winterssy/sreq"
 )
 
-func TestGet(t *testing.T) {
-	resp := sreq.
+func TestValue(t *testing.T) {
+	value := make(sreq.Value)
+
+	value.Set("key1", "value1")
+	if len(value) != 1 {
+		t.Error("Set value failed")
+	}
+
+	if v := value.Get("key1"); v != "value1" {
+		t.Error("Get value failed")
+	}
+
+	value.Del("key1")
+	if len(value) != 0 {
+		t.Error("Del value failed")
+	}
+}
+
+func TestData(t *testing.T) {
+	data := make(sreq.Data)
+
+	data.Set("msg", "hello world")
+	data.Set("num", 2019)
+	if len(data) != 2 {
+		t.Error("Set value failed")
+	}
+
+	if data.Get("msg") != "hello world" || data.Get("num") != 2019 {
+		t.Error("Get value failed")
+	}
+
+	data.Del("msg")
+	data.Del("num")
+	if len(data) != 0 {
+		t.Error("Del value failed")
+	}
+}
+
+func TestFile_String(t *testing.T) {
+	file := &sreq.File{
+		FieldName: "testfile",
+		FileName:  "testfile",
+		FilePath:  "testfile.txt",
+	}
+
+	want := `{"fieldname":"testfile","filename":"testfile"}`
+	if got := file.String(); got != want {
+		t.Errorf("File_String got %s, want: %s", got, want)
+	}
+
+	file = &sreq.File{}
+	want = "{}"
+	if got := file.String(); got != want {
+		t.Errorf("File_String got %s, want: %s", got, want)
+	}
+}
+
+func TestNew(t *testing.T) {
+	req := sreq.New(http.DefaultClient,
+		sreq.WithParams(sreq.Value{
+			"defaultKey1": "defaultValue1",
+			"defaultKey2": "defaultValue2",
+		}),
+	)
+
+	type response struct {
+		Args map[string]string `json:"args"`
+	}
+
+	resp := new(response)
+	err := req.
 		Get("http://httpbin.org/get").
-		EnsureStatusOk()
-	if resp.Err != nil {
-		t.Error(resp.Err)
+		EnsureStatusOk().
+		JSON(resp)
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.Args["defaultKey1"] != "defaultValue1" || resp.Args["defaultKey2"] != "defaultValue2" {
+		t.Error("Set default HTTP request options failed")
+	}
+}
+
+func TestRequest(t *testing.T) {
+	_, err := sreq.
+		Request(sreq.MethodGet, "http://httpbin.org/get").
+		EnsureStatusOk().
+		Text()
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGet(t *testing.T) {
+	_, err := sreq.
+		Get("http://httpbin.org/get").
+		EnsureStatusOk().
+		Text()
+	if err != nil {
+		t.Error(err)
 	}
 }
 
 func TestHead(t *testing.T) {
-	resp := sreq.
+	_, err := sreq.
 		Head("http://httpbin.org").
-		EnsureStatusOk()
-	if resp.Err != nil {
-		t.Error(resp.Err)
+		EnsureStatusOk().
+		Text()
+	if err != nil {
+		t.Error(err)
 	}
 }
 
 func TestPost(t *testing.T) {
-	resp := sreq.
+	_, err := sreq.
 		Post("http://httpbin.org/post").
-		EnsureStatusOk()
-	if resp.Err != nil {
-		t.Error(resp.Err)
+		EnsureStatusOk().
+		Text()
+	if err != nil {
+		t.Error(err)
 	}
 }
 
 func TestPut(t *testing.T) {
-	resp := sreq.
+	_, err := sreq.
 		Put("http://httpbin.org/put").
-		EnsureStatusOk()
-	if resp.Err != nil {
-		t.Error(resp.Err)
+		EnsureStatusOk().
+		Text()
+	if err != nil {
+		t.Error(err)
 	}
 }
 
 func TestPatch(t *testing.T) {
-	resp := sreq.
+	_, err := sreq.
 		Patch("http://httpbin.org/patch").
-		EnsureStatusOk()
-	if resp.Err != nil {
-		t.Error(resp.Err)
+		EnsureStatusOk().
+		Text()
+	if err != nil {
+		t.Error(err)
 	}
 }
 
 func TestDelete(t *testing.T) {
-	resp := sreq.
+	_, err := sreq.
 		Delete("http://httpbin.org/delete").
-		EnsureStatusOk()
-	if resp.Err != nil {
-		t.Error(resp.Err)
+		EnsureStatusOk().
+		Text()
+	if err != nil {
+		t.Error(err)
 	}
 }
 
 func TestOptions(t *testing.T) {
-	resp := sreq.Options("http://httpbin.org").EnsureStatusOk()
-	if resp.Err != nil {
-		t.Error(resp.Err)
+	_, err := sreq.
+		Options("http://httpbin.org").
+		EnsureStatusOk().
+		Text()
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestConnect(t *testing.T) {
+	type response struct {
+		Method string `json:"method"`
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := response{Method: r.Method}
+		json.NewEncoder(w).Encode(resp)
+	}))
+
+	resp := new(response)
+	err := sreq.
+		Connect(ts.URL).
+		EnsureStatusOk().
+		JSON(resp)
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.Method != sreq.MethodConnect {
+		t.Error("send CONNECT HTTP request failed")
+	}
+}
+
+func TestTrace(t *testing.T) {
+	type response struct {
+		Method string `json:"method"`
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := response{Method: r.Method}
+		json.NewEncoder(w).Encode(resp)
+	}))
+
+	resp := new(response)
+	err := sreq.
+		Trace(ts.URL).
+		EnsureStatusOk().
+		JSON(resp)
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.Method != sreq.MethodTrace {
+		t.Error("send TRACE HTTP request failed")
 	}
 }
 
 func TestWithParams(t *testing.T) {
-	var data struct {
+	type response struct {
 		Args map[string]string `json:"args"`
 	}
 
+	resp := new(response)
 	err := sreq.
 		Get("http://httpbin.org/get",
 			sreq.WithParams(sreq.Value{
@@ -81,20 +233,21 @@ func TestWithParams(t *testing.T) {
 			}),
 		).
 		EnsureStatusOk().
-		JSON(&data)
+		JSON(resp)
 	if err != nil {
 		t.Error(err)
 	}
-	if data.Args["key1"] != "value1" || data.Args["key2"] != "value2" {
+	if resp.Args["key1"] != "value1" || resp.Args["key2"] != "value2" {
 		t.Error("Set params failed")
 	}
 }
 
 func TestWithForm(t *testing.T) {
-	var data struct {
+	type response struct {
 		Form map[string]string `json:"form"`
 	}
 
+	resp := new(response)
 	err := sreq.
 		Post("http://httpbin.org/post",
 			sreq.WithForm(sreq.Value{
@@ -103,23 +256,24 @@ func TestWithForm(t *testing.T) {
 			}),
 		).
 		EnsureStatusOk().
-		JSON(&data)
+		JSON(resp)
 	if err != nil {
 		t.Error(err)
 	}
-	if data.Form["key1"] != "value1" || data.Form["key2"] != "value2" {
+	if resp.Form["key1"] != "value1" || resp.Form["key2"] != "value2" {
 		t.Error("Send form failed")
 	}
 }
 
 func TestWithJSON(t *testing.T) {
-	var data struct {
+	type response struct {
 		JSON struct {
 			Msg string `json:"msg"`
 			Num int    `json:"num"`
 		} `json:"json"`
 	}
 
+	resp := new(response)
 	err := sreq.
 		Post("http://httpbin.org/post",
 			sreq.WithJSON(sreq.Data{
@@ -128,20 +282,46 @@ func TestWithJSON(t *testing.T) {
 			}),
 		).
 		EnsureStatusOk().
-		JSON(&data)
+		JSON(resp)
 	if err != nil {
 		t.Error(err)
 	}
-	if data.JSON.Msg != "hello world" || data.JSON.Num != 2019 {
+	if resp.JSON.Msg != "hello world" || resp.JSON.Num != 2019 {
 		t.Error("Send json failed")
 	}
 }
 
+func TestWithHost(t *testing.T) {
+	type response struct {
+		Host string `json:"host"`
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := response{Host: r.Host}
+		json.NewEncoder(w).Encode(resp)
+	}))
+
+	resp := new(response)
+	err := sreq.
+		Get(ts.URL,
+			sreq.WithHost("github.com"),
+		).
+		EnsureStatusOk().
+		JSON(resp)
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.Host != "github.com" {
+		t.Error("Set host failed")
+	}
+}
+
 func TestWithHeaders(t *testing.T) {
-	var data struct {
+	type response struct {
 		Headers map[string]string `json:"headers"`
 	}
 
+	resp := new(response)
 	err := sreq.
 		Get("http://httpbin.org/get",
 			sreq.WithHeaders(sreq.Value{
@@ -150,20 +330,21 @@ func TestWithHeaders(t *testing.T) {
 			}),
 		).
 		EnsureStatusOk().
-		JSON(&data)
+		JSON(resp)
 	if err != nil {
 		t.Error(err)
 	}
-	if data.Headers["Origin"] != "http://httpbin.org" || data.Headers["Referer"] != "http://httpbin.org" {
+	if resp.Headers["Origin"] != "http://httpbin.org" || resp.Headers["Referer"] != "http://httpbin.org" {
 		t.Error("Set headers failed")
 	}
 }
 
 func TestWithCookies(t *testing.T) {
-	var data struct {
+	type response struct {
 		Cookies map[string]string `json:"cookies"`
 	}
 
+	resp := new(response)
 	err := sreq.
 		Get("http://httpbin.org/cookies/set",
 			sreq.WithCookies(
@@ -178,19 +359,21 @@ func TestWithCookies(t *testing.T) {
 			),
 		).
 		EnsureStatusOk().
-		JSON(&data)
+		JSON(resp)
 	if err != nil {
 		t.Error(err)
 	}
-	if data.Cookies["name1"] != "value1" || data.Cookies["name2"] != "value2" {
+	if resp.Cookies["name1"] != "value1" || resp.Cookies["name2"] != "value2" {
 		t.Error("Set cookies failed")
 	}
 }
 
 func TestWithFiles(t *testing.T) {
-	var data struct {
+	type response struct {
 		Files map[string]string `json:"files"`
 	}
+
+	resp := new(response)
 	err := sreq.
 		Post("http://httpbin.org/post",
 			sreq.WithFiles(
@@ -200,57 +383,145 @@ func TestWithFiles(t *testing.T) {
 					FilePath:  "./testdata/testfile1.txt",
 				},
 				&sreq.File{
-					FieldName: "testfile2",
-					FileName:  "testfile2.txt",
+					FieldName: "",
+					FileName:  "",
 					FilePath:  "./testdata/testfile2.txt",
 				},
 			),
 		).
 		EnsureStatusOk().
-		JSON(&data)
+		JSON(resp)
 	if err != nil {
 		t.Error(err)
 	}
-
-	if data.Files["testfile1"] == "" || data.Files["testfile2"] == "" {
-		t.Error("Send files failed")
+	if resp.Files["testfile1"] != "testfile1.txt" || resp.Files["file2"] != "testfile2.txt" {
+		t.Error("Upload files failed")
 	}
 }
 
 func TestWithBasicAuth(t *testing.T) {
-	var data struct {
+	type response struct {
 		Authenticated bool   `json:"authenticated"`
 		User          string `json:"user"`
 	}
+
+	resp := new(response)
 	err := sreq.
 		Get("http://httpbin.org/basic-auth/admin/pass",
 			sreq.WithBasicAuth("admin", "pass"),
 		).
 		EnsureStatusOk().
-		JSON(&data)
+		JSON(resp)
 	if err != nil {
 		t.Error(err)
 	}
-	if !data.Authenticated || data.User != "admin" {
+	if !resp.Authenticated || resp.User != "admin" {
 		t.Error("Set basic authentication failed")
 	}
 }
 
 func TestWithBearerToken(t *testing.T) {
-	var data struct {
+	type response struct {
 		Authenticated bool   `json:"authenticated"`
 		Token         string `json:"token"`
 	}
+
+	resp := new(response)
 	err := sreq.
 		Get("http://httpbin.org/bearer",
 			sreq.WithBearerToken("sreq"),
 		).
 		EnsureStatusOk().
-		JSON(&data)
+		JSON(resp)
 	if err != nil {
 		t.Error(err)
 	}
-	if !data.Authenticated || data.Token != "sreq" {
+	if !resp.Authenticated || resp.Token != "sreq" {
 		t.Error("Set bearer token failed")
+	}
+}
+
+func TestWithContext(t *testing.T) {
+	_, err := sreq.Get("http://httpbin.org/delay/10",
+		sreq.WithContext(nil),
+	).Resolve()
+	if err == nil {
+		t.Error("nil Context not checked")
+	}
+
+	ch := make(chan *sreq.Response)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	go func() {
+		resp := sreq.
+			Get("http://httpbin.org/delay/10",
+				sreq.WithContext(ctx),
+			)
+		ch <- resp
+	}()
+
+	if resp := <-ch; resp.Err == nil || resp.R != nil {
+		t.Error("Set context failed")
+	}
+}
+
+func TestResponse_Resolve(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	}))
+
+	resp, err := sreq.
+		Request(sreq.MethodGet, ts.URL).
+		Resolve()
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.StatusCode != http.StatusForbidden {
+		t.Errorf("Response_Resolve got: %d, want: %d", resp.StatusCode, http.StatusForbidden)
+	}
+}
+
+func TestResponse_EnsureStatus(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case sreq.MethodGet:
+			w.WriteHeader(http.StatusOK)
+		case sreq.MethodPost:
+			w.WriteHeader(http.StatusCreated)
+		default:
+			w.WriteHeader(http.StatusForbidden)
+		}
+	}))
+
+	_, err := sreq.
+		Get(ts.URL).
+		EnsureStatusOk().
+		Resolve()
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, err = sreq.
+		Post(ts.URL).
+		EnsureStatusOk().
+		Resolve()
+	if err == nil {
+		t.Error("EnsureStatusOk failed")
+	}
+
+	_, err = sreq.
+		Post(ts.URL).
+		EnsureStatus2xx().
+		Resolve()
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, err = sreq.
+		Patch(ts.URL).
+		EnsureStatus2xx().
+		Resolve()
+	if err == nil {
+		t.Error("EnsureStatus2xx failed")
 	}
 }

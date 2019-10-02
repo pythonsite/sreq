@@ -65,7 +65,7 @@ type (
 	}
 
 	// Option specifies the HTTP request options, like params, form, etc.
-	Option func(*http.Request) error
+	Option func(*http.Request) (*http.Request, error)
 
 	// Response wraps the original HTTP response and the potential error.
 	Response struct {
@@ -163,37 +163,37 @@ func New(httpClient *http.Client, defaultOpts ...Option) *Client {
 
 // WithHost specifies the host on which the URL is sought.
 func WithHost(host string) Option {
-	return func(hr *http.Request) error {
+	return func(hr *http.Request) (*http.Request, error) {
 		hr.Host = host
-		return nil
+		return hr, nil
 	}
 }
 
 // WithHeaders sets headers of the HTTP request.
 func WithHeaders(headers Value) Option {
-	return func(hr *http.Request) error {
+	return func(hr *http.Request) (*http.Request, error) {
 		for k, v := range headers {
 			hr.Header.Set(k, v)
 		}
-		return nil
+		return hr, nil
 	}
 }
 
 // WithParams sets query params of the HTTP request.
 func WithParams(params Value) Option {
-	return func(hr *http.Request) error {
+	return func(hr *http.Request) (*http.Request, error) {
 		query := hr.URL.Query()
 		for k, v := range params {
 			query.Set(k, v)
 		}
 		hr.URL.RawQuery = query.Encode()
-		return nil
+		return hr, nil
 	}
 }
 
 // WithForm sets form payload of the HTTP request.
 func WithForm(form Value) Option {
-	return func(hr *http.Request) error {
+	return func(hr *http.Request) (*http.Request, error) {
 		data := urlpkg.Values{}
 		for k, v := range form {
 			data.Set(k, v)
@@ -209,16 +209,16 @@ func WithForm(form Value) Option {
 		}
 
 		hr.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		return nil
+		return hr, nil
 	}
 }
 
 // WithJSON sets json payload of the HTTP request.
 func WithJSON(data Data) Option {
-	return func(hr *http.Request) error {
+	return func(hr *http.Request) (*http.Request, error) {
 		b, err := json.Marshal(data)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		r := bytes.NewReader(b)
@@ -231,13 +231,13 @@ func WithJSON(data Data) Option {
 		}
 
 		hr.Header.Set("Content-Type", "application/json")
-		return nil
+		return hr, nil
 	}
 }
 
 // WithFiles sets files payload of the HTTP request.
 func WithFiles(files ...*File) Option {
-	return func(hr *http.Request) error {
+	return func(hr *http.Request) (*http.Request, error) {
 		r, w := io.Pipe()
 		mw := multipart.NewWriter(w)
 		go func() {
@@ -247,7 +247,7 @@ func WithFiles(files ...*File) Option {
 			for i, v := range files {
 				fieldName, fileName, filePath := v.FieldName, v.FileName, v.FilePath
 				if fieldName == "" {
-					fieldName = "file" + strconv.Itoa(i)
+					fieldName = "file" + strconv.Itoa(i+1)
 				}
 				if fileName == "" {
 					fileName = filepath.Base(filePath)
@@ -271,25 +271,25 @@ func WithFiles(files ...*File) Option {
 
 		hr.Body = r
 		hr.Header.Set("Content-Type", mw.FormDataContentType())
-		return nil
+		return hr, nil
 	}
 }
 
 // WithCookies sets cookies of the HTTP request.
 func WithCookies(cookies ...*http.Cookie) Option {
-	return func(hr *http.Request) error {
+	return func(hr *http.Request) (*http.Request, error) {
 		for _, c := range cookies {
 			hr.AddCookie(c)
 		}
-		return nil
+		return hr, nil
 	}
 }
 
 // WithBasicAuth sets basic authentication of the HTTP request.
 func WithBasicAuth(username string, password string) Option {
-	return func(hr *http.Request) error {
+	return func(hr *http.Request) (*http.Request, error) {
 		hr.Header.Set("Authorization", "Basic "+basicAuth(username, password))
-		return nil
+		return hr, nil
 	}
 }
 
@@ -300,20 +300,19 @@ func basicAuth(username, password string) string {
 
 // WithBearerToken sets bearer token of the HTTP request.
 func WithBearerToken(token string) Option {
-	return func(hr *http.Request) error {
+	return func(hr *http.Request) (*http.Request, error) {
 		hr.Header.Set("Authorization", "Bearer "+token)
-		return nil
+		return hr, nil
 	}
 }
 
 // WithContext sets context of the HTTP request.
 func WithContext(ctx context.Context) Option {
-	return func(hr *http.Request) error {
+	return func(hr *http.Request) (*http.Request, error) {
 		if ctx == nil {
-			return errors.New("sreq: nil Context")
+			return nil, errors.New("sreq: nil Context")
 		}
-		hr.WithContext(ctx)
-		return nil
+		return hr.WithContext(ctx), nil
 	}
 }
 
@@ -424,7 +423,7 @@ func (c *Client) Request(method string, url string, options ...Option) *Response
 	httpReq.Header.Set("User-Agent", "sreq "+Version)
 
 	for _, opt := range c.defaultOpts {
-		err = opt(httpReq)
+		httpReq, err = opt(httpReq)
 		if err != nil {
 			resp.Err = err
 			return resp
@@ -432,7 +431,7 @@ func (c *Client) Request(method string, url string, options ...Option) *Response
 	}
 
 	for _, opt := range options {
-		err = opt(httpReq)
+		httpReq, err = opt(httpReq)
 		if err != nil {
 			resp.Err = err
 			return resp
