@@ -15,8 +15,6 @@ import (
 	"net/http/cookiejar"
 	urlpkg "net/url"
 	"os"
-	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -119,11 +117,7 @@ func (d Data) Del(key string) {
 
 // String returns the JSON-encoded text representation of a file.
 func (f *File) String() string {
-	b, err := json.Marshal(f)
-	if err != nil {
-		return "{}"
-	}
-
+	b, _ := json.Marshal(f)
 	return string(b)
 }
 
@@ -238,26 +232,32 @@ func WithJSON(data Data) Option {
 // WithFiles sets files payload of the HTTP request.
 func WithFiles(files ...*File) Option {
 	return func(hr *http.Request) (*http.Request, error) {
+		fieldSet := make(map[string]bool)
+		for _, f := range files {
+			if fieldSet[f.FieldName] {
+				return nil, errors.New("sreq: field name of files should be different")
+			}
+			if f.FileName == "" {
+				return nil, errors.New("sreq: file name should not be empty")
+			}
+			if f.FilePath == "" {
+				return nil, errors.New("sreq: file path should not be empty")
+			}
+			fieldSet[f.FieldName] = true
+		}
+
 		r, w := io.Pipe()
 		mw := multipart.NewWriter(w)
 		go func() {
 			defer w.Close()
 			defer mw.Close()
 
-			for i, v := range files {
-				fieldName, fileName, filePath := v.FieldName, v.FileName, v.FilePath
-				if fieldName == "" {
-					fieldName = "file" + strconv.Itoa(i+1)
-				}
-				if fileName == "" {
-					fileName = filepath.Base(filePath)
-				}
-
-				part, err := mw.CreateFormFile(fieldName, fileName)
+			for _, v := range files {
+				part, err := mw.CreateFormFile(v.FieldName, v.FileName)
 				if err != nil {
 					return
 				}
-				file, err := os.Open(filePath)
+				file, err := os.Open(v.FilePath)
 				if err != nil {
 					return
 				}
@@ -480,6 +480,11 @@ func (r *Response) Text() (string, error) {
 
 // JSON decodes the HTTP response body of r and unmarshals its JSON-encoded data into v.
 func (r *Response) JSON(v interface{}) error {
+	if r.Err != nil {
+		return r.Err
+	}
+	defer r.R.Body.Close()
+
 	return json.NewDecoder(r.R.Body).Decode(v)
 }
 
@@ -494,7 +499,7 @@ func (r *Response) EnsureStatus2xx() *Response {
 		return r
 	}
 	if r.R.StatusCode/100 != 2 {
-		r.Err = fmt.Errorf("status code 2xx expected but got: %d", r.R.StatusCode)
+		r.Err = fmt.Errorf("sreq: status code 2xx expected but got: %d", r.R.StatusCode)
 	}
 	return r
 }
@@ -505,7 +510,7 @@ func (r *Response) EnsureStatus(code int) *Response {
 		return r
 	}
 	if r.R.StatusCode != code {
-		r.Err = fmt.Errorf("status code %d expected but got: %d", code, r.R.StatusCode)
+		r.Err = fmt.Errorf("sreq: status code %d expected but got: %d", code, r.R.StatusCode)
 	}
 	return r
 }

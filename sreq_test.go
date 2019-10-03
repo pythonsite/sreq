@@ -3,6 +3,7 @@ package sreq_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -100,6 +101,22 @@ func TestRequest(t *testing.T) {
 		Text()
 	if err != nil {
 		t.Error(err)
+	}
+
+	_, err = sreq.
+		Request("@", "httpbin.org/get").
+		EnsureStatusOk().
+		Text()
+	if err == nil {
+		t.Error("Request method not checked")
+	}
+
+	_, err = sreq.
+		Request(sreq.MethodGet, "httpbin.org/get").
+		EnsureStatusOk().
+		Text()
+	if err == nil {
+		t.Error("Request url not checked")
 	}
 }
 
@@ -369,22 +386,74 @@ func TestWithCookies(t *testing.T) {
 }
 
 func TestWithFiles(t *testing.T) {
-	type response struct {
-		Files map[string]string `json:"files"`
-	}
-
-	resp := new(response)
-	err := sreq.
+	_, err := sreq.
 		Post("http://httpbin.org/post",
 			sreq.WithFiles(
 				&sreq.File{
-					FieldName: "testfile1",
+					FieldName: "field1",
+					FileName:  "",
+					FilePath:  "./testdata/testfile1.txt",
+				},
+			),
+		).
+		EnsureStatusOk().
+		Resolve()
+	if err == nil {
+		t.Error("not check empty file name")
+	}
+
+	_, err = sreq.
+		Post("http://httpbin.org/post",
+			sreq.WithFiles(
+				&sreq.File{
+					FieldName: "field1",
+					FileName:  "testfile1.txt",
+					FilePath:  "",
+				},
+			),
+		).
+		EnsureStatusOk().
+		Resolve()
+	if err == nil {
+		t.Error("not check empty file path")
+	}
+
+	_, err = sreq.
+		Post("http://httpbin.org/post",
+			sreq.WithFiles(
+				&sreq.File{
+					FieldName: "field1",
 					FileName:  "testfile1.txt",
 					FilePath:  "./testdata/testfile1.txt",
 				},
 				&sreq.File{
-					FieldName: "",
-					FileName:  "",
+					FieldName: "field1",
+					FileName:  "testfile2.txt",
+					FilePath:  "./testdata/testfile2.txt",
+				},
+			),
+		).
+		EnsureStatusOk().
+		Resolve()
+	if err == nil {
+		t.Error("not check field names clash")
+	}
+
+	type response struct {
+		Files map[string]string `json:"files"`
+	}
+	resp := new(response)
+	err = sreq.
+		Post("http://httpbin.org/post",
+			sreq.WithFiles(
+				&sreq.File{
+					FieldName: "field1",
+					FileName:  "testfile1.txt",
+					FilePath:  "./testdata/testfile1.txt",
+				},
+				&sreq.File{
+					FieldName: "field2",
+					FileName:  "testfile2.txt",
 					FilePath:  "./testdata/testfile2.txt",
 				},
 			),
@@ -394,7 +463,7 @@ func TestWithFiles(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if resp.Files["testfile1"] != "testfile1.txt" || resp.Files["file2"] != "testfile2.txt" {
+	if resp.Files["field1"] != "testfile1.txt" || resp.Files["field2"] != "testfile2.txt" {
 		t.Error("Upload files failed")
 	}
 }
@@ -454,9 +523,10 @@ func TestWithContext(t *testing.T) {
 	defer cancel()
 	go func() {
 		resp := sreq.
-			Get("http://httpbin.org/delay/10",
+			Post("http://httpbin.org/delay/10",
 				sreq.WithContext(ctx),
-			)
+			).
+			EnsureStatus2xx()
 		ch <- resp
 	}()
 
@@ -478,6 +548,35 @@ func TestResponse_Resolve(t *testing.T) {
 	}
 	if resp.StatusCode != http.StatusForbidden {
 		t.Errorf("Response_Resolve got: %d, want: %d", resp.StatusCode, http.StatusForbidden)
+	}
+}
+
+func TestResponse_Text(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case sreq.MethodPost:
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, "created")
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			fmt.Fprint(w, "method not allowed")
+		}
+	}))
+
+	data, err := sreq.
+		Post(ts.URL).
+		EnsureStatusOk().
+		Text()
+	if err != nil || data != "created" {
+		t.Error(err)
+	}
+
+	data, err = sreq.
+		Put(ts.URL).
+		EnsureStatus2xx().
+		Text()
+	if err == nil || data != "" {
+		t.Error("Response_Text failed")
 	}
 }
 
@@ -510,10 +609,26 @@ func TestResponse_EnsureStatus(t *testing.T) {
 	}
 
 	_, err = sreq.
+		Patch(ts.URL).
+		EnsureStatus2xx().
+		Resolve()
+	if err == nil {
+		t.Error("EnsureStatus2xx failed")
+	}
+
+	_, err = sreq.
 		Delete(ts.URL).
 		EnsureStatus(http.StatusForbidden).
 		Resolve()
 	if err != nil {
 		t.Error(err)
+	}
+
+	_, err = sreq.
+		Delete(ts.URL).
+		EnsureStatus(http.StatusOK).
+		Resolve()
+	if err == nil {
+		t.Error("EnsureStatus failed")
 	}
 }
