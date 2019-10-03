@@ -485,13 +485,7 @@ func (r *Response) JSON(v interface{}) error {
 
 // EnsureStatusOk ensures the HTTP response's status code of r must be 200.
 func (r *Response) EnsureStatusOk() *Response {
-	if r.Err != nil {
-		return r
-	}
-	if r.R.StatusCode != http.StatusOK {
-		r.Err = fmt.Errorf("status code 200 expected but got: %d", r.R.StatusCode)
-	}
-	return r
+	return r.EnsureStatus(http.StatusOK)
 }
 
 // EnsureStatus2xx ensures the HTTP response's status code of r must be 2xx.
