@@ -61,12 +61,6 @@ func TestFile_String(t *testing.T) {
 	if got := file.String(); got != want {
 		t.Errorf("File_String got %s, want: %s", got, want)
 	}
-
-	file = &sreq.File{}
-	want = "{}"
-	if got := file.String(); got != want {
-		t.Errorf("File_String got %s, want: %s", got, want)
-	}
 }
 
 func TestNew(t *testing.T) {
@@ -96,19 +90,11 @@ func TestNew(t *testing.T) {
 
 func TestRequest(t *testing.T) {
 	_, err := sreq.
-		Request(sreq.MethodGet, "http://httpbin.org/get").
-		EnsureStatusOk().
-		Text()
-	if err != nil {
-		t.Error(err)
-	}
-
-	_, err = sreq.
 		Request("@", "httpbin.org/get").
 		EnsureStatusOk().
 		Text()
 	if err == nil {
-		t.Error("Request method not checked")
+		t.Error("Request method unchecked")
 	}
 
 	_, err = sreq.
@@ -116,7 +102,15 @@ func TestRequest(t *testing.T) {
 		EnsureStatusOk().
 		Text()
 	if err == nil {
-		t.Error("Request url not checked")
+		t.Error("Request url unchecked")
+	}
+
+	_, err = sreq.
+		Request(sreq.MethodGet, "http://httpbin.org/get").
+		EnsureStatusOk().
+		Text()
+	if err != nil {
+		t.Error(err)
 	}
 }
 
@@ -209,7 +203,7 @@ func TestConnect(t *testing.T) {
 		t.Error(err)
 	}
 	if resp.Method != sreq.MethodConnect {
-		t.Error("send CONNECT HTTP request failed")
+		t.Error("Send CONNECT HTTP request failed")
 	}
 }
 
@@ -232,7 +226,7 @@ func TestTrace(t *testing.T) {
 		t.Error(err)
 	}
 	if resp.Method != sreq.MethodTrace {
-		t.Error("send TRACE HTTP request failed")
+		t.Error("Send TRACE HTTP request failed")
 	}
 }
 
@@ -399,7 +393,7 @@ func TestWithFiles(t *testing.T) {
 		EnsureStatusOk().
 		Resolve()
 	if err == nil {
-		t.Error("not check empty file name")
+		t.Error("Empty file name unchecked")
 	}
 
 	_, err = sreq.
@@ -415,7 +409,7 @@ func TestWithFiles(t *testing.T) {
 		EnsureStatusOk().
 		Resolve()
 	if err == nil {
-		t.Error("not check empty file path")
+		t.Error("Empty file path unchecked")
 	}
 
 	_, err = sreq.
@@ -436,7 +430,7 @@ func TestWithFiles(t *testing.T) {
 		EnsureStatusOk().
 		Resolve()
 	if err == nil {
-		t.Error("not check field names clash")
+		t.Error("Field names clash unchecked")
 	}
 
 	type response struct {
@@ -515,7 +509,7 @@ func TestWithContext(t *testing.T) {
 		sreq.WithContext(nil),
 	).Resolve()
 	if err == nil {
-		t.Error("nil Context not checked")
+		t.Error("Nil Context unchecked")
 	}
 
 	ch := make(chan *sreq.Response)
@@ -531,7 +525,7 @@ func TestWithContext(t *testing.T) {
 	}()
 
 	if resp := <-ch; resp.Err == nil || resp.R != nil {
-		t.Error("Set context failed")
+		t.Error("Set Context failed")
 	}
 }
 
@@ -613,7 +607,7 @@ func TestResponse_EnsureStatus(t *testing.T) {
 		EnsureStatus2xx().
 		Resolve()
 	if err == nil {
-		t.Error("EnsureStatus2xx failed")
+		t.Error("Response_EnsureStatus2xx failed")
 	}
 
 	_, err = sreq.
@@ -629,6 +623,6 @@ func TestResponse_EnsureStatus(t *testing.T) {
 		EnsureStatus(http.StatusOK).
 		Resolve()
 	if err == nil {
-		t.Error("EnsureStatus failed")
+		t.Error("Response_EnsureStatus failed")
 	}
 }
