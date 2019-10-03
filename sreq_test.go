@@ -503,14 +503,6 @@ func TestResponse_EnsureStatus(t *testing.T) {
 
 	_, err = sreq.
 		Post(ts.URL).
-		EnsureStatusOk().
-		Resolve()
-	if err == nil {
-		t.Error("EnsureStatusOk failed")
-	}
-
-	_, err = sreq.
-		Post(ts.URL).
 		EnsureStatus2xx().
 		Resolve()
 	if err != nil {
@@ -518,10 +510,10 @@ func TestResponse_EnsureStatus(t *testing.T) {
 	}
 
 	_, err = sreq.
-		Patch(ts.URL).
-		EnsureStatus2xx().
+		Delete(ts.URL).
+		EnsureStatus(http.StatusForbidden).
 		Resolve()
-	if err == nil {
-		t.Error("EnsureStatus2xx failed")
+	if err != nil {
+		t.Error(err)
 	}
 }

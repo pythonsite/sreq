@@ -504,3 +504,14 @@ func (r *Response) EnsureStatus2xx() *Response {
 	}
 	return r
 }
+
+// EnsureStatus ensures the HTTP response's status code of r must be the code parameter.
+func (r *Response) EnsureStatus(code int) *Response {
+	if r.Err != nil {
+		return r
+	}
+	if r.R.StatusCode != code {
+		r.Err = fmt.Errorf("status code %d expected but got: %d", code, r.R.StatusCode)
+	}
+	return r
+}
