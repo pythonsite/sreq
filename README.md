@@ -136,12 +136,12 @@ fmt.Println(data)
 
 ```go
 data, err := sreq.
-    Post("http://httpbin.org/post").
-    JSON(sreq.Data{
-        "msg": "hello world",
-        "num": 2019,
-    }).
-    Send().
+    Post("http://httpbin.org/post",
+         sreq.WithJSON(sreq.Data{
+             "msg": "hello world",
+             "num": 2019,
+         }),
+        ).
     Text()
 if err != nil {
     panic(err)
