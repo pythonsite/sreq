@@ -32,13 +32,13 @@ import "github.com/winterssy/sreq"
 
 ## 例子
 
-sreq发送请求跟基础库net/http非常像，你可以无缝切换。举个栗子，如果你之前的请求是这样的：
+`sreq` 发送请求跟基础库 `net/http` 非常像，你可以无缝切换。举个栗子，如果你之前的请求是这样的：
 
 ```go
 resp, err := http.Get("http://www.baidu.com")
 ```
 
-使用sreq你只须这样：
+使用 `sreq` 你只须这样：
 
 ```go
 resp, err := sreq.Get("http://www.baidu.com").Resolve()
@@ -96,7 +96,7 @@ fmt.Println(data)
 
 ```go
 data, err := sreq.
-    Get("http://httpbin.org/cookies/set",
+    Get("http://httpbin.org/cookies",
         sreq.WithCookies(
             &http.Cookie{
                 Name:  "name1",
@@ -202,36 +202,17 @@ fmt.Println(data)
 
 ### 设置默认请求选项
 
-如果你希望每个HTTP请求都带上一些默认选项，可以通过自定义sreq客户端实现。
+如果你希望每个HTTP请求都带上一些默认选项，可以这样做：
 
 ```go
-req := sreq.New(nil,
-	sreq.WithParams(sreq.Value{
-		"defaultKey1": "defaultValue1",
-		"defaultKey2": "defaultValue2",
-	}),
+sreq.SetDefaultRequestOpts(
+    sreq.WithParams(sreq.Value{
+        "defaultKey1": "defaultValue1",
+        "defaultKey2": "defaultValue2",
+    }),
 )
-
-data, err := req.
-    Get("http://httpbin.org/get",
-        sreq.WithParams(sreq.Value{
-            "key1": "value1",
-            "key2": "value2",
-        }),
-       ).
-    Text()
-if err != nil {
-    panic(err)
-}
-fmt.Println(data)
-
-data, err = req.
-    Get("http://httpbin.org/get",
-        sreq.WithParams(sreq.Value{
-            "key3": "value3",
-            "key4": "value4",
-        }),
-       ).
+data, err := sreq.
+    Get("http://httpbin.org/get").
     Text()
 if err != nil {
     panic(err)
@@ -241,7 +222,7 @@ fmt.Println(data)
 
 ### 自定义HTTP客户端
 
-sreq没有提供直接修改传输层、重定向策略、cookie jar、超时、代理或者其它能通过构造 `*http.Client` 实现配置的API，你可以通过自定义sreq客户端来设置它们。
+`sreq` 没有提供直接修改传输层、重定向策略、cookie jar、超时、代理或者其它能通过构造 `*http.Client` 实现配置的API，你可以通过自定义 `sreq` 客户端来设置它们。
 
 ```go
 transport := &http.Transport{
@@ -282,7 +263,7 @@ fmt.Println(data)
 
 ### 并发安全
 
-sreq是并发安全的，你可以无障碍地在goroutines中使用它。
+`sreq` 是并发安全的，你可以无障碍地在goroutines中使用它。
 
 ```go
 const MaxWorker = 1000

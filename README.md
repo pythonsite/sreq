@@ -32,13 +32,13 @@ import "github.com/winterssy/sreq"
 
 ## Examples
 
-sreq's usages are very similar to net/http library, you can switch from it to sreq easily. For example, if your HTTP request code like this:
+The usages of `sreq` are very similar to `net/http` library, you can switch from it to `sreq` easily. For example, if your HTTP request code like this:
 
 ```go
 resp, err := http.Get("http://www.google.com")
 ```
 
-Use sreq you can change your code like this:
+Use `sreq` you just need to change your code like this:
 
 ```go
 resp, err := sreq.Get("http://www.google.com").Resolve()
@@ -96,7 +96,7 @@ fmt.Println(data)
 
 ```go
 data, err := sreq.
-    Get("http://httpbin.org/cookies/set",
+    Get("http://httpbin.org/cookies",
         sreq.WithCookies(
             &http.Cookie{
                 Name:  "name1",
@@ -202,36 +202,17 @@ fmt.Println(data)
 
 ## Set Default HTTP Request Options
 
-If you want to set default HTTP request options for per request, you can construct a custom sreq client and pass the default options.
+If you want to set default HTTP request options for per request, you can do like this:
 
 ```go
-req := sreq.New(nil,
-	sreq.WithParams(sreq.Value{
-		"defaultKey1": "defaultValue1",
-		"defaultKey2": "defaultValue2",
-	}),
+sreq.SetDefaultRequestOpts(
+    sreq.WithParams(sreq.Value{
+        "defaultKey1": "defaultValue1",
+        "defaultKey2": "defaultValue2",
+    }),
 )
-
-data, err := req.
-    Get("http://httpbin.org/get",
-        sreq.WithParams(sreq.Value{
-            "key1": "value1",
-            "key2": "value2",
-        }),
-       ).
-    Text()
-if err != nil {
-    panic(err)
-}
-fmt.Println(data)
-
-data, err = req.
-    Get("http://httpbin.org/get",
-        sreq.WithParams(sreq.Value{
-            "key3": "value3",
-            "key4": "value4",
-        }),
-       ).
+data, err := sreq.
+    Get("http://httpbin.org/get").
     Text()
 if err != nil {
     panic(err)
@@ -241,7 +222,7 @@ fmt.Println(data)
 
 ### Customize HTTP Client
 
-For some reasons, sreq does not provide direct APIs for setting transport, redirection policy, cookie jar, timeout, proxy or something else can be set by constructing a `*http.Client`. Construct a custom sreq client if you want to do so.
+For some reasons, `sreq` does not provide direct APIs for setting transport, redirection policy, cookie jar, timeout, proxy or something else can be set by constructing a `*http.Client`. Construct a custom `sreq` client if you want to do so.
 
 ```go
 transport := &http.Transport{
@@ -282,7 +263,7 @@ fmt.Println(data)
 
 ### Concurrent Safe
 
-sreq is concurrent safe, you can easily use it across goroutines.
+`sreq` is concurrent safe, you can easily use it across goroutines.
 
 ```go
 const MaxWorker = 1000

@@ -21,7 +21,7 @@ func main() {
 	// uploadFiles()
 	// setBasicAuth()
 	// setBearerToken()
-	// setDefaultOpts()
+	// setDefaultRequestOpts()
 	// customizeHTTPClient()
 	// concurrentSafe()
 }
@@ -58,7 +58,7 @@ func setHeaders() {
 
 func setCookies() {
 	data, err := sreq.
-		Get("http://httpbin.org/cookies/set",
+		Get("http://httpbin.org/cookies",
 			sreq.WithCookies(
 				&http.Cookie{
 					Name:  "name1",
@@ -152,34 +152,15 @@ func setBearerToken() {
 	fmt.Println(data)
 }
 
-func setDefaultOpts() {
-	req := sreq.New(nil,
+func setDefaultRequestOpts() {
+	sreq.SetDefaultRequestOpts(
 		sreq.WithParams(sreq.Value{
 			"defaultKey1": "defaultValue1",
 			"defaultKey2": "defaultValue2",
 		}),
 	)
-
-	data, err := req.
-		Get("http://httpbin.org/get",
-			sreq.WithParams(sreq.Value{
-				"key1": "value1",
-				"key2": "value2",
-			}),
-		).
-		Text()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(data)
-
-	data, err = req.
-		Get("http://httpbin.org/get",
-			sreq.WithParams(sreq.Value{
-				"key3": "value3",
-				"key4": "value4",
-			}),
-		).
+	data, err := sreq.
+		Get("http://httpbin.org/get").
 		Text()
 	if err != nil {
 		panic(err)
