@@ -67,3 +67,27 @@ func (c *Client) SetDefaultRequestOpts(opts ...RequestOption) {
 	c.defaultRequestOpts = opts
 	c.mux.Unlock()
 }
+
+// AddDefaultRequestOpts appends std's default request options for per HTTP request.
+func AddDefaultRequestOpts(opts ...RequestOption) {
+	std.AddDefaultRequestOpts(opts...)
+}
+
+// AddDefaultRequestOpts appends c's default request options for per HTTP request.
+func (c *Client) AddDefaultRequestOpts(opts ...RequestOption) {
+	c.mux.Lock()
+	c.defaultRequestOpts = append(c.defaultRequestOpts, opts...)
+	c.mux.Unlock()
+}
+
+// ClearDefaultRequestOpts clears std's default request options for per HTTP request.
+func ClearDefaultRequestOpts() {
+	std.ClearDefaultRequestOpts()
+}
+
+// ClearDefaultRequestOpts clears c's default request options for per HTTP request.
+func (c *Client) ClearDefaultRequestOpts() {
+	c.mux.Lock()
+	c.defaultRequestOpts = nil
+	c.mux.Unlock()
+}
