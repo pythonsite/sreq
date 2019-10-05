@@ -211,98 +211,98 @@ func WithContext(ctx context.Context) RequestOption {
 }
 
 // Get makes GET HTTP requests using the default sreq client.
-func Get(url string, options ...RequestOption) *Response {
-	return std.Get(url, options...)
+func Get(url string, opts ...RequestOption) *Response {
+	return std.Get(url, opts...)
 }
 
 // Get makes GET HTTP requests using c.
-func (c *Client) Get(url string, options ...RequestOption) *Response {
-	return c.Request(MethodGet, url, options...)
+func (c *Client) Get(url string, opts ...RequestOption) *Response {
+	return c.Request(MethodGet, url, opts...)
 }
 
 // Head makes HEAD HTTP requests using the default sreq client.
-func Head(url string, options ...RequestOption) *Response {
-	return std.Head(url, options...)
+func Head(url string, opts ...RequestOption) *Response {
+	return std.Head(url, opts...)
 }
 
 // Head makes HEAD HTTP requests using c.
-func (c *Client) Head(url string, options ...RequestOption) *Response {
-	return c.Request(MethodHead, url, options...)
+func (c *Client) Head(url string, opts ...RequestOption) *Response {
+	return c.Request(MethodHead, url, opts...)
 }
 
 // Post makes POST HTTP requests using the default sreq client.
-func Post(url string, options ...RequestOption) *Response {
-	return std.Post(url, options...)
+func Post(url string, opts ...RequestOption) *Response {
+	return std.Post(url, opts...)
 }
 
 // Post makes POST HTTP requests using c.
-func (c *Client) Post(url string, options ...RequestOption) *Response {
-	return c.Request(MethodPost, url, options...)
+func (c *Client) Post(url string, opts ...RequestOption) *Response {
+	return c.Request(MethodPost, url, opts...)
 }
 
 // Put makes PUT HTTP requests using the default sreq client.
-func Put(url string, options ...RequestOption) *Response {
-	return std.Put(url, options...)
+func Put(url string, opts ...RequestOption) *Response {
+	return std.Put(url, opts...)
 }
 
 // Put makes PUT HTTP requests using c.
-func (c *Client) Put(url string, options ...RequestOption) *Response {
-	return std.Request(MethodPut, url, options...)
+func (c *Client) Put(url string, opts ...RequestOption) *Response {
+	return std.Request(MethodPut, url, opts...)
 }
 
 // Patch makes PATCH HTTP requests using the default sreq client.
-func Patch(url string, options ...RequestOption) *Response {
-	return std.Patch(url, options...)
+func Patch(url string, opts ...RequestOption) *Response {
+	return std.Patch(url, opts...)
 }
 
 // Patch makes PATCH HTTP requests using c.
-func (c *Client) Patch(url string, options ...RequestOption) *Response {
-	return c.Request(MethodPatch, url, options...)
+func (c *Client) Patch(url string, opts ...RequestOption) *Response {
+	return c.Request(MethodPatch, url, opts...)
 }
 
 // Delete makes DELETE HTTP requests using the default sreq client.
-func Delete(url string, options ...RequestOption) *Response {
-	return std.Delete(url, options...)
+func Delete(url string, opts ...RequestOption) *Response {
+	return std.Delete(url, opts...)
 }
 
 // Delete makes DELETE HTTP requests using c.
-func (c *Client) Delete(url string, options ...RequestOption) *Response {
-	return c.Request(MethodDelete, url, options...)
+func (c *Client) Delete(url string, opts ...RequestOption) *Response {
+	return c.Request(MethodDelete, url, opts...)
 }
 
 // Connect makes CONNECT HTTP requests using the default sreq client.
-func Connect(url string, options ...RequestOption) *Response {
-	return std.Connect(url, options...)
+func Connect(url string, opts ...RequestOption) *Response {
+	return std.Connect(url, opts...)
 }
 
 // Connect makes CONNECT HTTP requests using c.
-func (c *Client) Connect(url string, options ...RequestOption) *Response {
-	return c.Request(MethodConnect, url, options...)
+func (c *Client) Connect(url string, opts ...RequestOption) *Response {
+	return c.Request(MethodConnect, url, opts...)
 }
 
 // Options makes GET OPTIONS request using the default sreq client.
-func Options(url string, options ...RequestOption) *Response {
-	return std.Options(url, options...)
+func Options(url string, opts ...RequestOption) *Response {
+	return std.Options(url, opts...)
 }
 
 // Options makes GET OPTIONS request using c.
-func (c *Client) Options(url string, options ...RequestOption) *Response {
-	return c.Request(MethodOptions, url, options...)
+func (c *Client) Options(url string, opts ...RequestOption) *Response {
+	return c.Request(MethodOptions, url, opts...)
 }
 
 // Trace makes TRACE HTTP requests using the default sreq client.
-func Trace(url string, options ...RequestOption) *Response {
-	return std.Trace(url, options...)
+func Trace(url string, opts ...RequestOption) *Response {
+	return std.Trace(url, opts...)
 }
 
 // Trace makes TRACE HTTP requests using c.
-func (c *Client) Trace(url string, options ...RequestOption) *Response {
-	return c.Request(MethodTrace, url, options...)
+func (c *Client) Trace(url string, opts ...RequestOption) *Response {
+	return c.Request(MethodTrace, url, opts...)
 }
 
 // Request makes HTTP requests using the default sreq client.
-func Request(method string, url string, options ...RequestOption) *Response {
-	return std.Request(method, url, options...)
+func Request(method string, url string, opts ...RequestOption) *Response {
+	return std.Request(method, url, opts...)
 }
 
 // Request makes HTTP requests using c.
