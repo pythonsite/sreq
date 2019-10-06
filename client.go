@@ -21,39 +21,46 @@ type (
 	}
 )
 
-// New constructs and returns a new sreq client.
+// New allows you to customize a sreq client with an HTTP client.
+// If the transport or timeout of the HTTP client not specified, sreq would use the default value.
 func New(httpClient *http.Client) *Client {
-	c := &Client{
-		mux: new(sync.RWMutex),
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+	jar, _ := cookiejar.New(&cookiejar.Options{
+		PublicSuffixList: publicsuffix.List,
+	})
+	timeout := 120 * time.Second
+
+	hc := &http.Client{
+		Transport: transport,
+		Jar:       jar,
+		Timeout:   timeout,
 	}
 
 	if httpClient != nil {
-		c.httpClient = httpClient
-	} else {
-		transport := &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			DialContext: (&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).DialContext,
-			MaxIdleConns:          100,
-			IdleConnTimeout:       90 * time.Second,
-			TLSHandshakeTimeout:   10 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
+		if httpClient.Transport != nil {
+			hc.Transport = httpClient.Transport
 		}
-		jar, _ := cookiejar.New(&cookiejar.Options{
-			PublicSuffixList: publicsuffix.List,
-		})
-		timeout := 120 * time.Second
-
-		c.httpClient = &http.Client{
-			Transport: transport,
-			Jar:       jar,
-			Timeout:   timeout,
+		if httpClient.Timeout > 0 {
+			hc.Timeout = httpClient.Timeout
 		}
+		hc.CheckRedirect = httpClient.CheckRedirect
+		hc.Jar = httpClient.Jar
 	}
 
-	return c
+	return &Client{
+		httpClient: hc,
+		mux:        new(sync.RWMutex),
+	}
 }
 
 // SetDefaultRequestOpts sets std's default request options for per HTTP request.
