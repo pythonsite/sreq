@@ -3,6 +3,7 @@ package sreq_test
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/winterssy/sreq"
 )
@@ -13,7 +14,10 @@ func TestNew(t *testing.T) {
 		t.Error("New got a nil sreq Client")
 	}
 
-	req = sreq.New(&http.Client{})
+	req = sreq.New(&http.Client{
+		Transport: http.DefaultTransport,
+		Timeout:   120 * time.Second,
+	})
 	if req == nil {
 		t.Error("New got a nil sreq Client")
 	}

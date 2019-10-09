@@ -1,6 +1,9 @@
 package sreq
 
-import "encoding/json"
+import (
+	"encoding/json"
+	urlpkg "net/url"
+)
 
 const (
 	// Version of sreq.
@@ -37,6 +40,16 @@ func (v Value) Del(key string) {
 	delete(v, key)
 }
 
+// String returns the``URL encoded'' form of v
+// ("bar=baz&foo=quux") sorted by key.
+func (v Value) String() string {
+	values := make(urlpkg.Values, len(v))
+	for _k, _v := range v {
+		values.Set(_k, _v)
+	}
+	return values.Encode()
+}
+
 // Get returns the value from a map by the given key.
 func (d Data) Get(key string) interface{} {
 	return d[key]
@@ -50,6 +63,12 @@ func (d Data) Set(key string, value interface{}) {
 // Del deletes the value related to the given key from a map.
 func (d Data) Del(key string) {
 	delete(d, key)
+}
+
+// String returns the JSON-encoded text representation of the JSON payload.
+func (d Data) String() string {
+	b, _ := json.Marshal(d)
+	return string(b)
 }
 
 // String returns the JSON-encoded text representation of a file.

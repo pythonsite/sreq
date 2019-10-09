@@ -1,8 +1,11 @@
 package sreq_test
 
 import (
-	"github.com/winterssy/sreq"
+	"encoding/json"
+	"reflect"
 	"testing"
+
+	"github.com/winterssy/sreq"
 )
 
 func TestValue(t *testing.T) {
@@ -20,6 +23,18 @@ func TestValue(t *testing.T) {
 	value.Del("key1")
 	if len(value) != 0 {
 		t.Error("Del value failed")
+	}
+}
+
+func TestValue_String(t *testing.T) {
+	value := make(sreq.Value)
+	value.Set("hash", "hello")
+	value.Set("key", "world")
+	value.Set("from", "qq")
+
+	want := "from=qq&hash=hello&key=world"
+	if got := value.String(); got != want {
+		t.Errorf("Value_String got: %s, want: %s", got, want)
 	}
 }
 
@@ -43,6 +58,19 @@ func TestData(t *testing.T) {
 	}
 }
 
+func TestData_String(t *testing.T) {
+	data := sreq.Data{
+		"msg": "hello world",
+		"num": 2019,
+	}
+
+	want := make(sreq.Data)
+	err := json.Unmarshal([]byte(data.String()), &want)
+	if err != nil || reflect.DeepEqual(want, data) {
+		t.Errorf("Data_String failed")
+	}
+}
+
 func TestFile_String(t *testing.T) {
 	file := &sreq.File{
 		FieldName: "testfile",
@@ -50,8 +78,9 @@ func TestFile_String(t *testing.T) {
 		FilePath:  "testfile.txt",
 	}
 
-	want := `{"fieldname":"testfile","filename":"testfile"}`
-	if got := file.String(); got != want {
-		t.Errorf("File_String got %s, want: %s", got, want)
+	want := sreq.File{}
+	err := json.Unmarshal([]byte(file.String()), &want)
+	if err != nil || reflect.DeepEqual(want, file) {
+		t.Errorf("File_String failed")
 	}
 }
