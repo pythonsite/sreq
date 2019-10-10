@@ -285,8 +285,10 @@ func WithFiles(files ...*File) RequestOption {
 			if fieldSet[f.FieldName] {
 				return nil, errors.New("sreq: field name of files should be different")
 			}
-			if _, err := ExistsFile(f.FilePath); err != nil {
-				return nil, fmt.Errorf("sreq: unexpected file path of %q: %s", f.FieldName, err.Error())
+			if ok, err := ExistsFile(f.FilePath); err != nil {
+				if !ok {
+					return nil, fmt.Errorf("sreq: unexpected file path of %q: %s", f.FieldName, err.Error())
+				}
 			}
 			fieldSet[f.FieldName] = true
 		}

@@ -81,15 +81,16 @@ func (f *File) String() string {
 // ExistsFile checks whether a file exists or not.
 func ExistsFile(name string) (bool, error) {
 	fi, err := os.Stat(name)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false, err
+	if err == nil {
+		if fi.Mode().IsDir() {
+			return false, fmt.Errorf("%q is a directory", name)
 		}
+		return true, nil
 	}
 
-	if fi.Mode().IsDir() {
-		return false, fmt.Errorf("%q is a directory", name)
+	if os.IsNotExist(err) {
+		return false, err
 	}
 
-	return true, nil
+	return true, err
 }
