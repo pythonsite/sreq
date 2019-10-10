@@ -101,6 +101,27 @@ func (f Form) String() string {
 }
 
 // Get returns the value from a map by the given key.
+func (j JSON) Get(key string) interface{} {
+	return j[key]
+}
+
+// Set sets a kv pair into a map.
+func (j JSON) Set(key string, value interface{}) {
+	j[key] = value
+}
+
+// Del deletes the value related to the given key from a map.
+func (j JSON) Del(key string) {
+	delete(j, key)
+}
+
+// String returns the JSON-encoded text representation of j.
+func (j JSON) String() string {
+	b, _ := json.Marshal(j)
+	return string(b)
+}
+
+// Get returns the value from a map by the given key.
 func (f Files) Get(key string) string {
 	return f[key]
 }
@@ -118,27 +139,6 @@ func (f Files) Del(key string) {
 // String returns the JSON-encoded text representation of f.
 func (f Files) String() string {
 	b, _ := json.Marshal(f)
-	return string(b)
-}
-
-// Get returns the value from a map by the given key.
-func (d JSON) Get(key string) interface{} {
-	return d[key]
-}
-
-// Set sets a kv pair into a map.
-func (d JSON) Set(key string, value interface{}) {
-	d[key] = value
-}
-
-// Del deletes the value related to the given key from a map.
-func (d JSON) Del(key string) {
-	delete(d, key)
-}
-
-// String returns the JSON-encoded text representation of d.
-func (d JSON) String() string {
-	b, _ := json.Marshal(d)
 	return string(b)
 }
 
