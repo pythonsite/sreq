@@ -195,7 +195,7 @@ func WithHost(host string) RequestOption {
 }
 
 // WithHeaders sets headers of the HTTP request.
-func WithHeaders(headers Value) RequestOption {
+func WithHeaders(headers Headers) RequestOption {
 	return func(hr *http.Request) (*http.Request, error) {
 		for k, v := range headers {
 			hr.Header.Set(k, v)
@@ -205,7 +205,7 @@ func WithHeaders(headers Value) RequestOption {
 }
 
 // WithQuery sets query params of the HTTP request.
-func WithQuery(params Value) RequestOption {
+func WithQuery(params Params) RequestOption {
 	return func(hr *http.Request) (*http.Request, error) {
 		query := hr.URL.Query()
 		for k, v := range params {
@@ -234,7 +234,7 @@ func WithText(text string) RequestOption {
 }
 
 // WithForm sets form payload of the HTTP request.
-func WithForm(form Value) RequestOption {
+func WithForm(form Form) RequestOption {
 	return func(hr *http.Request) (*http.Request, error) {
 		data := urlpkg.Values{}
 		for k, v := range form {
@@ -256,7 +256,7 @@ func WithForm(form Value) RequestOption {
 }
 
 // WithJSON sets json payload of the HTTP request.
-func WithJSON(data Data) RequestOption {
+func WithJSON(data JSON) RequestOption {
 	return func(hr *http.Request) (*http.Request, error) {
 		b, err := json.Marshal(data)
 		if err != nil {
@@ -278,19 +278,14 @@ func WithJSON(data Data) RequestOption {
 }
 
 // WithFiles sets files payload of the HTTP request.
-func WithFiles(files ...*File) RequestOption {
+func WithFiles(files Files) RequestOption {
 	return func(hr *http.Request) (*http.Request, error) {
-		fieldSet := make(map[string]bool)
-		for _, f := range files {
-			if fieldSet[f.FieldName] {
-				return nil, errors.New("sreq: field name of files should be different")
-			}
-			if ok, err := ExistsFile(f.FilePath); err != nil {
+		for fieldName, filePath := range files {
+			if ok, err := ExistsFile(filePath); err != nil {
 				if !ok {
-					return nil, fmt.Errorf("sreq: unexpected file path of %q: %s", f.FieldName, err.Error())
+					return nil, fmt.Errorf("sreq: unexpected file path of %q: %s", fieldName, err.Error())
 				}
 			}
-			fieldSet[f.FieldName] = true
 		}
 
 		r, w := io.Pipe()
@@ -299,13 +294,13 @@ func WithFiles(files ...*File) RequestOption {
 			defer w.Close()
 			defer mw.Close()
 
-			for _, v := range files {
-				fileName := filepath.Base(v.FilePath)
-				part, err := mw.CreateFormFile(v.FieldName, fileName)
+			for fieldName, filePath := range files {
+				fileName := filepath.Base(filePath)
+				part, err := mw.CreateFormFile(fieldName, fileName)
 				if err != nil {
 					return
 				}
-				file, err := os.Open(v.FilePath)
+				file, err := os.Open(filePath)
 				if err != nil {
 					return
 				}

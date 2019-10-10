@@ -8,79 +8,131 @@ import (
 	"github.com/winterssy/sreq"
 )
 
-func TestValue(t *testing.T) {
-	value := make(sreq.Value)
+func TestParams(t *testing.T) {
+	p := make(sreq.Params)
 
-	value.Set("key1", "value1")
-	if len(value) != 1 {
-		t.Error("Set value failed")
+	p.Set("key1", "value1")
+	p.Set("key2", "value2")
+	p.Set("key3", "value3")
+	if p["key1"] != "value1" || p["key2"] != "value2" || p["key3"] != "value3" {
+		t.Fatal("Params_Set test failed")
 	}
 
-	if v := value.Get("key1"); v != "value1" {
-		t.Error("Get value failed")
+	if p.Get("key1") != "value1" || p.Get("key2") != "value2" || p.Get("key3") != "value3" {
+		t.Error("Params_Get test failed")
 	}
 
-	value.Del("key1")
-	if len(value) != 0 {
-		t.Error("Delete value failed")
+	p.Del("key1")
+	if p["key1"] != "" || len(p) != 2 {
+		t.Error("Params_Del test failed")
 	}
-}
 
-func TestValue_String(t *testing.T) {
-	value := make(sreq.Value)
-	value.Set("hash", "hello")
-	value.Set("key", "world")
-	value.Set("from", "qq")
-
-	want := "from=qq&hash=hello&key=world"
-	if got := value.String(); got != want {
-		t.Errorf("Value_String got: %s, want: %s", got, want)
+	want := "key2=value2&key3=value3"
+	if got := p.String(); got != want {
+		t.Errorf("Params_String got: %s, want: %s", got, want)
 	}
 }
 
-func TestData(t *testing.T) {
-	data := make(sreq.Data)
+func TestHeaders(t *testing.T) {
+	h1 := make(sreq.Headers)
 
-	data.Set("msg", "hello world")
-	data.Set("num", 2019)
-	if len(data) != 2 {
-		t.Error("Set value failed")
+	h1.Set("key1", "value1")
+	h1.Set("key2", "value2")
+	if h1["key1"] != "value1" || h1["key2"] != "value2" {
+		t.Fatal("Headers_Set test failed")
 	}
 
-	if data.Get("msg") != "hello world" || data.Get("num") != 2019 {
-		t.Error("Get value failed")
+	if h1.Get("key1") != "value1" || h1.Get("key2") != "value2" {
+		t.Error("Headers_Get test failed")
 	}
 
-	data.Del("msg")
-	data.Del("num")
-	if len(data) != 0 {
-		t.Error("Delete value failed")
-	}
-}
-
-func TestData_String(t *testing.T) {
-	data := sreq.Data{
-		"msg": "hello world",
-		"num": 2019,
+	h1.Del("key1")
+	if h1["key1"] != "" || len(h1) != 1 {
+		t.Error("Headers_Del test failed")
 	}
 
-	want := make(sreq.Data)
-	err := json.Unmarshal([]byte(data.String()), &want)
-	if err != nil || reflect.DeepEqual(want, data) {
-		t.Errorf("Data_String test failed")
+	h2 := make(sreq.Headers)
+	if err := json.Unmarshal([]byte(h1.String()), &h2); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(h2, h1) {
+		t.Error("Headers test failed")
 	}
 }
 
-func TestFile_String(t *testing.T) {
-	file := &sreq.File{
-		FieldName: "testfile",
-		FilePath:  "testfile.txt",
+func TestForm(t *testing.T) {
+	f := make(sreq.Form)
+
+	f.Set("key1", "value1")
+	f.Set("key2", "value2")
+	f.Set("key3", "value3")
+	if f["key1"] != "value1" || f["key2"] != "value2" || f["key3"] != "value3" {
+		t.Fatal("Form_Set test failed")
 	}
 
-	want := sreq.File{}
-	err := json.Unmarshal([]byte(file.String()), &want)
-	if err != nil || reflect.DeepEqual(want, file) {
-		t.Errorf("File_String test failed")
+	if f.Get("key1") != "value1" || f.Get("key2") != "value2" || f.Get("key3") != "value3" {
+		t.Error("Form_Get test failed")
+	}
+
+	f.Del("key1")
+	if f["key1"] != "" || len(f) != 2 {
+		t.Error("Form_Del test failed")
+	}
+
+	want := "key2=value2&key3=value3"
+	if got := f.String(); got != want {
+		t.Errorf("Form_String got: %s, want: %s", got, want)
+	}
+}
+
+func TestJSON(t *testing.T) {
+	j1 := make(sreq.JSON)
+
+	j1.Set("msg", "hello world")
+	j1.Set("num", 2019)
+	if j1["msg"] != "hello world" || j1["num"] != 2019 {
+		t.Fatal("JSON_Set test failed")
+	}
+
+	if j1.Get("msg") != "hello world" || j1.Get("num") != 2019 {
+		t.Error("JSON_Get test failed")
+	}
+
+	j1.Del("msg")
+	if j1["msg"] != nil || len(j1) != 1 {
+		t.Error("JSON_Del test failed")
+	}
+
+	want := `{"num":2019}`
+	if got := j1.String(); got != want {
+		t.Errorf("JSON_string got: %s, want: %s", got, want)
+	}
+}
+
+func TestFiles(t *testing.T) {
+	f1 := make(sreq.Files)
+
+	f1.Set("key1", "value1")
+	f1.Set("key2", "value2")
+	if f1["key1"] != "value1" || f1["key2"] != "value2" {
+		t.Fatal("Files_Set test failed")
+	}
+
+	if f1.Get("key1") != "value1" || f1.Get("key2") != "value2" {
+		t.Error("Files_Get test failed")
+	}
+
+	f1.Del("key1")
+	if f1["key1"] != "" || len(f1) != 1 {
+		t.Error("Files_Del test failed")
+	}
+
+	f2 := make(sreq.Files)
+	if err := json.Unmarshal([]byte(f1.String()), &f2); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(f2, f1) {
+		t.Error("Files test failed")
 	}
 }
 

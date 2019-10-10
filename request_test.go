@@ -98,7 +98,7 @@ func TestConnect(t *testing.T) {
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if resp.Method != sreq.MethodConnect {
 		t.Error("Send CONNECT HTTP request failed")
@@ -122,7 +122,7 @@ func TestTrace(t *testing.T) {
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if resp.Method != sreq.MethodTrace {
 		t.Error("Send TRACE HTTP request failed")
@@ -163,7 +163,7 @@ func TestWithQuery(t *testing.T) {
 	resp := new(response)
 	err := sreq.
 		Get("http://httpbin.org/get",
-			sreq.WithQuery(sreq.Value{
+			sreq.WithQuery(sreq.Params{
 				"key1": "value1",
 				"key2": "value2",
 			}),
@@ -171,7 +171,7 @@ func TestWithQuery(t *testing.T) {
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if resp.Args["key1"] != "value1" || resp.Args["key2"] != "value2" {
 		t.Error("Set params failed")
@@ -197,7 +197,7 @@ func TestWithHost(t *testing.T) {
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if resp.Host != "github.com" {
 		t.Error("Set host failed")
@@ -212,7 +212,7 @@ func TestWithHeaders(t *testing.T) {
 	resp := new(response)
 	err := sreq.
 		Get("http://httpbin.org/get",
-			sreq.WithHeaders(sreq.Value{
+			sreq.WithHeaders(sreq.Headers{
 				"Origin":  "http://httpbin.org",
 				"Referer": "http://httpbin.org",
 			}),
@@ -220,7 +220,7 @@ func TestWithHeaders(t *testing.T) {
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if resp.Headers["Origin"] != "http://httpbin.org" || resp.Headers["Referer"] != "http://httpbin.org" {
 		t.Error("Set headers failed")
@@ -249,7 +249,7 @@ func TestWithCookies(t *testing.T) {
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if resp.Cookies["name1"] != "value1" || resp.Cookies["name2"] != "value2" {
 		t.Error("Set cookies failed")
@@ -269,7 +269,7 @@ func TestWithText(t *testing.T) {
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if resp.Data != "hello world" {
 		t.Error("Send form failed")
@@ -284,7 +284,7 @@ func TestWithForm(t *testing.T) {
 	resp := new(response)
 	err := sreq.
 		Post("http://httpbin.org/post",
-			sreq.WithForm(sreq.Value{
+			sreq.WithForm(sreq.Form{
 				"key1": "value1",
 				"key2": "value2",
 			}),
@@ -292,7 +292,7 @@ func TestWithForm(t *testing.T) {
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if resp.Form["key1"] != "value1" || resp.Form["key2"] != "value2" {
 		t.Error("Send form failed")
@@ -310,7 +310,7 @@ func TestWithJSON(t *testing.T) {
 	resp := new(response)
 	err := sreq.
 		Post("http://httpbin.org/post",
-			sreq.WithJSON(sreq.Data{
+			sreq.WithJSON(sreq.JSON{
 				"msg": "hello world",
 				"num": 2019,
 			}),
@@ -318,7 +318,7 @@ func TestWithJSON(t *testing.T) {
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if resp.JSON.Msg != "hello world" || resp.JSON.Num != 2019 {
 		t.Error("Send json failed")
@@ -328,11 +328,9 @@ func TestWithJSON(t *testing.T) {
 func TestWithFiles(t *testing.T) {
 	_, err := sreq.
 		Post("http://httpbin.org/post",
-			sreq.WithFiles(
-				&sreq.File{
-					FieldName: "file",
-					FilePath:  "./testdata/testfile.txt",
-				},
+			sreq.WithFiles(sreq.Files{
+				"file": "./testdata/testfile.txt",
+			},
 			),
 		).
 		EnsureStatusOk().
@@ -341,46 +339,22 @@ func TestWithFiles(t *testing.T) {
 		t.Error("File not exists unchecked")
 	}
 
-	_, err = sreq.
-		Post("http://httpbin.org/post",
-			sreq.WithFiles(
-				&sreq.File{
-					FieldName: "file1",
-					FilePath:  "./testdata/testfile1.txt",
-				},
-				&sreq.File{
-					FieldName: "file1",
-					FilePath:  "./testdata/testfile2.txt",
-				},
-			),
-		).
-		EnsureStatusOk().
-		Resolve()
-	if err == nil {
-		t.Error("Field names clash unchecked")
-	}
-
 	type response struct {
 		Files map[string]string `json:"files"`
 	}
 	resp := new(response)
 	err = sreq.
 		Post("http://httpbin.org/post",
-			sreq.WithFiles(
-				&sreq.File{
-					FieldName: "file1",
-					FilePath:  "./testdata/testfile1.txt",
-				},
-				&sreq.File{
-					FieldName: "file2",
-					FilePath:  "./testdata/testfile2.txt",
-				},
+			sreq.WithFiles(sreq.Files{
+				"file1": "./testdata/testfile1.txt",
+				"file2": "./testdata/testfile2.txt",
+			},
 			),
 		).
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if resp.Files["file1"] != "testfile1.txt" || resp.Files["file2"] != "testfile2.txt" {
 		t.Error("Upload files failed")
@@ -401,7 +375,7 @@ func TestWithBasicAuth(t *testing.T) {
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if !resp.Authenticated || resp.User != "admin" {
 		t.Error("Set basic authentication failed")
@@ -422,7 +396,7 @@ func TestWithBearerToken(t *testing.T) {
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if !resp.Authenticated || resp.Token != "sreq" {
 		t.Error("Set bearer token failed")

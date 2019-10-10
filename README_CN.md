@@ -67,7 +67,7 @@ resp, err := sreq.Get("http://www.baidu.com").Resolve()
 ```go
 data, err := sreq.
     Get("http://httpbin.org/get",
-        sreq.WithQuery(sreq.Value{
+        sreq.WithQuery(sreq.Params{
             "key1": "value1",
             "key2": "value2",
         }),
@@ -84,7 +84,7 @@ fmt.Println(data)
 ```go
 data, err := sreq.
     Get("http://httpbin.org/get",
-        sreq.WithHeaders(sreq.Value{
+        sreq.WithHeaders(sreq.Headers{
             "Origin":  "http://httpbin.org",
             "Referer": "http://httpbin.org",
         }),
@@ -124,7 +124,7 @@ fmt.Println(data)
 ```go
 data, err := sreq.
     Post("http://httpbin.org/post",
-         sreq.WithForm(sreq.Value{
+         sreq.WithForm(sreq.Form{
              "key1": "value1",
              "key2": "value2",
          }),
@@ -141,7 +141,7 @@ fmt.Println(data)
 ```go
 data, err := sreq.
     Post("http://httpbin.org/post",
-         sreq.WithJSON(sreq.Data{
+         sreq.WithJSON(sreq.JSON{
              "msg": "hello world",
              "num": 2019,
          }),
@@ -157,16 +157,12 @@ fmt.Println(data)
 
 ```go
 data, err := sreq.
-    Post("http://httpbin.org/post", sreq.WithFiles(
-        &sreq.File{
-            FieldName: "image1",
-            FilePath:  "./testdata/testimage1.jpg",
-        },
-        &sreq.File{
-            FieldName: "image2",
-            FilePath:  "./testdata/testimage2.jpg",
-        },
-    )).
+    Post("http://httpbin.org/post",
+         sreq.WithFiles(sreq.Files{
+             "image1": "./testdata/testimage1.jpg",
+             "image2": "./testdata/testimage2.jpg",
+         }),
+        ).
     Text()
 if err != nil {
     panic(err)
@@ -208,7 +204,7 @@ fmt.Println(data)
 
 ```go
 sreq.SetDefaultRequestOpts(
-    sreq.WithQuery(sreq.Value{
+    sreq.WithQuery(sreq.Params{
         "defaultKey1": "defaultValue1",
         "defaultKey2": "defaultValue2",
     }),
@@ -276,7 +272,7 @@ for i := 0; i < MaxWorker; i++ {
     go func(i int) {
         defer wg.Done()
 
-        params := sreq.Value{}
+        params := sreq.Params{}
         params.Set(fmt.Sprintf("key%d", i), fmt.Sprintf("value%d", i))
 
         data, err := sreq.

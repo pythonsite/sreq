@@ -29,7 +29,7 @@ func main() {
 func setQueryParams() {
 	data, err := sreq.
 		Get("http://httpbin.org/get",
-			sreq.WithQuery(sreq.Value{
+			sreq.WithQuery(sreq.Params{
 				"key1": "value1",
 				"key2": "value2",
 			}),
@@ -44,7 +44,7 @@ func setQueryParams() {
 func setHeaders() {
 	data, err := sreq.
 		Get("http://httpbin.org/get",
-			sreq.WithHeaders(sreq.Value{
+			sreq.WithHeaders(sreq.Headers{
 				"Origin":  "http://httpbin.org",
 				"Referer": "http://httpbin.org",
 			}),
@@ -80,7 +80,7 @@ func setCookies() {
 func sendForm() {
 	data, err := sreq.
 		Post("http://httpbin.org/post",
-			sreq.WithForm(sreq.Value{
+			sreq.WithForm(sreq.Form{
 				"key1": "value1",
 				"key2": "value2",
 			}),
@@ -95,7 +95,7 @@ func sendForm() {
 func sendJSON() {
 	data, err := sreq.
 		Post("http://httpbin.org/post",
-			sreq.WithJSON(sreq.Data{
+			sreq.WithJSON(sreq.JSON{
 				"msg": "hello world",
 				"num": 2019,
 			}),
@@ -109,16 +109,12 @@ func sendJSON() {
 
 func uploadFiles() {
 	data, err := sreq.
-		Post("http://httpbin.org/post", sreq.WithFiles(
-			&sreq.File{
-				FieldName: "image1",
-				FilePath:  "./testdata/testimage1.jpg",
-			},
-			&sreq.File{
-				FieldName: "image2",
-				FilePath:  "./testdata/testimage2.jpg",
-			},
-		)).
+		Post("http://httpbin.org/post",
+			sreq.WithFiles(sreq.Files{
+				"image1": "./testdata/testimage1.jpg",
+				"image2": "./testdata/testimage2.jpg",
+			}),
+		).
 		Text()
 	if err != nil {
 		panic(err)
@@ -152,7 +148,7 @@ func setBearerToken() {
 
 func setDefaultRequestOpts() {
 	sreq.SetDefaultRequestOpts(
-		sreq.WithQuery(sreq.Value{
+		sreq.WithQuery(sreq.Params{
 			"defaultKey1": "defaultValue1",
 			"defaultKey2": "defaultValue2",
 		}),
@@ -212,7 +208,7 @@ func concurrentSafe() {
 		go func(i int) {
 			defer wg.Done()
 
-			params := sreq.Value{}
+			params := sreq.Params{}
 			params.Set(fmt.Sprintf("key%d", i), fmt.Sprintf("value%d", i))
 
 			data, err := sreq.

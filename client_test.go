@@ -29,7 +29,7 @@ func TestDefaultRequestOpts(t *testing.T) {
 	}
 
 	sreq.SetDefaultRequestOpts(
-		sreq.WithQuery(sreq.Value{
+		sreq.WithQuery(sreq.Params{
 			"defaultKey1": "defaultValue1",
 		}),
 	)
@@ -39,14 +39,14 @@ func TestDefaultRequestOpts(t *testing.T) {
 		EnsureStatusOk().
 		JSON(respSet)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if respSet.Args["defaultKey1"] != "defaultValue1" {
 		t.Error("Set default HTTP request options failed")
 	}
 
 	sreq.AddDefaultRequestOpts(
-		sreq.WithQuery(sreq.Value{
+		sreq.WithQuery(sreq.Params{
 			"defaultKey2": "defaultValue2",
 		}),
 	)
@@ -56,7 +56,7 @@ func TestDefaultRequestOpts(t *testing.T) {
 		EnsureStatusOk().
 		JSON(respAdd)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if respAdd.Args["defaultKey1"] != "defaultValue1" || respAdd.Args["defaultKey2"] != "defaultValue2" {
 		t.Error("Add default HTTP request options failed")
@@ -69,7 +69,7 @@ func TestDefaultRequestOpts(t *testing.T) {
 		EnsureStatusOk().
 		JSON(respClear)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if len(respClear.Args) != 0 {
 		t.Error("Clear default HTTP request options failed")
