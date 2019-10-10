@@ -71,7 +71,7 @@ func (h Headers) Del(key string) {
 
 // String returns the JSON-encoded text representation of h.
 func (h Headers) String() string {
-	b, _ := json.Marshal(h)
+	b, _ := json.MarshalIndent(h, "", "\t")
 	return string(b)
 }
 
@@ -117,7 +117,7 @@ func (j JSON) Del(key string) {
 
 // String returns the JSON-encoded text representation of j.
 func (j JSON) String() string {
-	b, _ := json.Marshal(j)
+	b, _ := json.MarshalIndent(j, "", "\t")
 	return string(b)
 }
 
@@ -138,7 +138,7 @@ func (f Files) Del(key string) {
 
 // String returns the JSON-encoded text representation of f.
 func (f Files) String() string {
-	b, _ := json.Marshal(f)
+	b, _ := json.MarshalIndent(f, "", "\t")
 	return string(b)
 }
 

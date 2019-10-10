@@ -86,25 +86,25 @@ func TestForm(t *testing.T) {
 }
 
 func TestJSON(t *testing.T) {
-	j1 := make(sreq.JSON)
+	j := make(sreq.JSON)
 
-	j1.Set("msg", "hello world")
-	j1.Set("num", 2019)
-	if j1["msg"] != "hello world" || j1["num"] != 2019 {
+	j.Set("msg", "hello world")
+	j.Set("num", 2019)
+	if j["msg"] != "hello world" || j["num"] != 2019 {
 		t.Fatal("JSON_Set test failed")
 	}
 
-	if j1.Get("msg") != "hello world" || j1.Get("num") != 2019 {
+	if j.Get("msg") != "hello world" || j.Get("num") != 2019 {
 		t.Error("JSON_Get test failed")
 	}
 
-	j1.Del("msg")
-	if j1["msg"] != nil || len(j1) != 1 {
+	j.Del("msg")
+	if j["msg"] != nil || len(j) != 1 {
 		t.Error("JSON_Del test failed")
 	}
 
-	want := `{"num":2019}`
-	if got := j1.String(); got != want {
+	want := "{\n\t\"num\": 2019\n}"
+	if got := j.String(); got != want {
 		t.Errorf("JSON_string got: %s, want: %s", got, want)
 	}
 }
