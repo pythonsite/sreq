@@ -14,5 +14,8 @@
 # Editor directories and files
 .idea
 
-# Temp files
+# Unnecessary project directories and files
+go.sum
+
+# Temp or test directories and files
 coverage.txt

@@ -6,6 +6,10 @@ A simple, user-friendly and concurrent safe HTTP request library for Go, 's' mea
 
 [![Build Status](https://github.com/winterssy/sreq/workflows/CI/badge.svg)](https://github.com/winterssy/sreq/actions) [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) [![codecov](https://codecov.io/gh/winterssy/sreq/branch/master/graph/badge.svg)](https://codecov.io/gh/winterssy/sreq) [![Go Report Card](https://goreportcard.com/badge/github.com/winterssy/sreq)](https://goreportcard.com/report/github.com/winterssy/sreq) [![GoDoc](https://godoc.org/github.com/winterssy/sreq?status.svg)](https://godoc.org/github.com/winterssy/sreq) [![License](https://img.shields.io/github/license/winterssy/sreq.svg)](LICENSE)
 
+## Notes
+
+`sreq` now is under an alpha test state, its APIs may be changed in future so it's not recommended to use in production. Welcome to give advise to the project.
+
 ## Features
 
 - GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, etc.
@@ -46,7 +50,7 @@ resp, err := sreq.Get("http://www.google.com").Resolve()
 
 See more examples as follow.
 
-- [Set Params](#Set-Params)
+- [Set Query Params](#Set-Query-Params)
 - [Set Headers](#Set-Headers)
 - [Set Cookies](#Set-Cookies)
 - [Send Form](#Send-Form)
@@ -58,12 +62,12 @@ See more examples as follow.
 - [Customize HTTP Client](#Customize-HTTP-Client)
 - [Concurrent Safe](#Concurrent-Safe)
 
-### Set Params
+### Set Query Params
 
 ```go
 data, err := sreq.
     Get("http://httpbin.org/get",
-        sreq.WithParams(sreq.Value{
+        sreq.WithQuery(sreq.Value{
             "key1": "value1",
             "key2": "value2",
         }),
@@ -155,13 +159,11 @@ fmt.Println(data)
 data, err := sreq.
     Post("http://httpbin.org/post", sreq.WithFiles(
         &sreq.File{
-            FieldName: "testimage1",
-            FileName:  "testimage1.jpg",
+            FieldName: "image1",
             FilePath:  "./testdata/testimage1.jpg",
         },
         &sreq.File{
-            FieldName: "testimage2",
-            FileName:  "testimage2.jpg",
+            FieldName: "image2",
             FilePath:  "./testdata/testimage2.jpg",
         },
     )).
@@ -206,7 +208,7 @@ If you want to set default HTTP request options for per request, you can do like
 
 ```go
 sreq.SetDefaultRequestOpts(
-    sreq.WithParams(sreq.Value{
+    sreq.WithQuery(sreq.Value{
         "defaultKey1": "defaultValue1",
         "defaultKey2": "defaultValue2",
     }),
@@ -279,7 +281,7 @@ for i := 0; i < MaxWorker; i++ {
 
         data, err := sreq.
             Get("http://httpbin.org/get",
-                sreq.WithParams(params),
+                sreq.WithQuery(params),
                ).
             Text()
         if err != nil {

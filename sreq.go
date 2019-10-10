@@ -2,7 +2,9 @@ package sreq
 
 import (
 	"encoding/json"
+	"fmt"
 	urlpkg "net/url"
+	"os"
 )
 
 const (
@@ -11,7 +13,7 @@ const (
 )
 
 type (
-	// Value is the same as map[string]string, used for params, headers, form, etc.
+	// Value is the same as map[string]string, used for query params, headers, form, etc.
 	Value map[string]string
 
 	// Data is the same as map[string]interface{}, used for JSON payload.
@@ -19,9 +21,8 @@ type (
 
 	// File defines a multipart-data.
 	File struct {
-		FieldName string `json:"fieldname,omitempty"`
-		FileName  string `json:"filename,omitempty"`
-		FilePath  string `json:"-"`
+		FieldName string `json:"fieldName,omitempty"`
+		FilePath  string `json:"filePath,omitempty"`
 	}
 )
 
@@ -75,4 +76,20 @@ func (d Data) String() string {
 func (f *File) String() string {
 	b, _ := json.Marshal(f)
 	return string(b)
+}
+
+// ExistsFile checks whether a file exists or not.
+func ExistsFile(name string) (bool, error) {
+	fi, err := os.Stat(name)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, err
+		}
+	}
+
+	if fi.Mode().IsDir() {
+		return false, fmt.Errorf("%q is a directory", name)
+	}
+
+	return true, nil
 }

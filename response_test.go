@@ -52,7 +52,7 @@ func TestResponse_Text(t *testing.T) {
 		EnsureStatus2xx().
 		Text()
 	if err == nil || data != "" {
-		t.Error("Response_Text failed")
+		t.Error("Response_Text test failed")
 	}
 }
 
@@ -90,7 +90,7 @@ func TestResponse_EnsureStatus(t *testing.T) {
 		EnsureStatus2xx().
 		Resolve()
 	if err == nil {
-		t.Error("Response_EnsureStatus2xx failed")
+		t.Error("Response_EnsureStatus2xx test failed")
 	}
 
 	_, err = sreq.
@@ -106,6 +106,6 @@ func TestResponse_EnsureStatus(t *testing.T) {
 		EnsureStatus(http.StatusOK).
 		Resolve()
 	if err == nil {
-		t.Error("Response_EnsureStatus failed")
+		t.Error("Response_EnsureStatus test failed")
 	}
 }

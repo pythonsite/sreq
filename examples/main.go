@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	// setParams()
+	// setQueryParams()
 	// setHeaders()
 	// setCookies()
 	// sendForm()
@@ -26,10 +26,10 @@ func main() {
 	// concurrentSafe()
 }
 
-func setParams() {
+func setQueryParams() {
 	data, err := sreq.
 		Get("http://httpbin.org/get",
-			sreq.WithParams(sreq.Value{
+			sreq.WithQuery(sreq.Value{
 				"key1": "value1",
 				"key2": "value2",
 			}),
@@ -111,13 +111,11 @@ func uploadFiles() {
 	data, err := sreq.
 		Post("http://httpbin.org/post", sreq.WithFiles(
 			&sreq.File{
-				FieldName: "testimage1",
-				FileName:  "testimage1.jpg",
+				FieldName: "image1",
 				FilePath:  "./testdata/testimage1.jpg",
 			},
 			&sreq.File{
-				FieldName: "testimage2",
-				FileName:  "testimage2.jpg",
+				FieldName: "image2",
 				FilePath:  "./testdata/testimage2.jpg",
 			},
 		)).
@@ -154,7 +152,7 @@ func setBearerToken() {
 
 func setDefaultRequestOpts() {
 	sreq.SetDefaultRequestOpts(
-		sreq.WithParams(sreq.Value{
+		sreq.WithQuery(sreq.Value{
 			"defaultKey1": "defaultValue1",
 			"defaultKey2": "defaultValue2",
 		}),
@@ -219,7 +217,7 @@ func concurrentSafe() {
 
 			data, err := sreq.
 				Get("http://httpbin.org/get",
-					sreq.WithParams(params),
+					sreq.WithQuery(params),
 				).
 				Text()
 			if err != nil {

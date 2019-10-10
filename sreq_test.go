@@ -22,7 +22,7 @@ func TestValue(t *testing.T) {
 
 	value.Del("key1")
 	if len(value) != 0 {
-		t.Error("Del value failed")
+		t.Error("Delete value failed")
 	}
 }
 
@@ -54,7 +54,7 @@ func TestData(t *testing.T) {
 	data.Del("msg")
 	data.Del("num")
 	if len(data) != 0 {
-		t.Error("Del value failed")
+		t.Error("Delete value failed")
 	}
 }
 
@@ -67,20 +67,45 @@ func TestData_String(t *testing.T) {
 	want := make(sreq.Data)
 	err := json.Unmarshal([]byte(data.String()), &want)
 	if err != nil || reflect.DeepEqual(want, data) {
-		t.Errorf("Data_String failed")
+		t.Errorf("Data_String test failed")
 	}
 }
 
 func TestFile_String(t *testing.T) {
 	file := &sreq.File{
 		FieldName: "testfile",
-		FileName:  "testfile",
 		FilePath:  "testfile.txt",
 	}
 
 	want := sreq.File{}
 	err := json.Unmarshal([]byte(file.String()), &want)
 	if err != nil || reflect.DeepEqual(want, file) {
-		t.Errorf("File_String failed")
+		t.Errorf("File_String test failed")
+	}
+}
+
+func TestExistsFile(t *testing.T) {
+	tests := []struct {
+		name string
+		want bool
+	}{
+		{
+			name: "./testdata/testfile1.txt",
+			want: true,
+		},
+		{
+			name: "./testdata/testfile.txt",
+			want: false,
+		},
+		{
+			name: "./testdata",
+			want: false,
+		},
+	}
+
+	for _, test := range tests {
+		if got, _ := sreq.ExistsFile(test.name); got != test.want {
+			t.Error("ExistsFile test failed")
+		}
 	}
 }

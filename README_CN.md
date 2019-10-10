@@ -6,10 +6,14 @@
 
 [![Build Status](https://github.com/winterssy/sreq/workflows/CI/badge.svg)](https://github.com/winterssy/sreq/actions) [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) [![codecov](https://codecov.io/gh/winterssy/sreq/branch/master/graph/badge.svg)](https://codecov.io/gh/winterssy/sreq) [![Go Report Card](https://goreportcard.com/badge/github.com/winterssy/sreq)](https://goreportcard.com/report/github.com/winterssy/sreq) [![GoDoc](https://godoc.org/github.com/winterssy/sreq?status.svg)](https://godoc.org/github.com/winterssy/sreq) [![License](https://img.shields.io/github/license/winterssy/sreq.svg)](LICENSE)
 
+## 注意
+
+`sreq` 现阶段处于alpha测试状态，它的API后续可能会变更，故并不推荐在生产环境使用。欢迎给项目提建议~
+
 ## 功能
 
 - 简便地发送GET/HEAD/POST/PUT/PATCH/DELETE/OPTIONS等HTTP请求。
-- 简便地设置参数，请求头，或者Cookies。
+- 简便地设置查询参数，请求头，或者Cookies。
 - 简便地发送Form表单，JSON数据，或者上传文件。
 - 简便地设置Basic认证，Bearer令牌。
 - 自动管理Cookies。
@@ -46,7 +50,7 @@ resp, err := sreq.Get("http://www.baidu.com").Resolve()
 
 更多的示例：
 
-- [设置参数](#设置参数)
+- [设置查询参数](#设置查询参数)
 - [设置请求头](#设置请求头)
 - [设置Cookies](#设置Cookies)
 - [发送Form表单](#发送Form表单)
@@ -58,12 +62,12 @@ resp, err := sreq.Get("http://www.baidu.com").Resolve()
 - [自定义HTTP客户端](#自定义HTTP客户端)
 - [并发安全](#并发安全)
 
-### 设置参数
+### 设置查询参数
 
 ```go
 data, err := sreq.
     Get("http://httpbin.org/get",
-        sreq.WithParams(sreq.Value{
+        sreq.WithQuery(sreq.Value{
             "key1": "value1",
             "key2": "value2",
         }),
@@ -155,13 +159,11 @@ fmt.Println(data)
 data, err := sreq.
     Post("http://httpbin.org/post", sreq.WithFiles(
         &sreq.File{
-            FieldName: "testimage1",
-            FileName:  "testimage1.jpg",
+            FieldName: "image1",
             FilePath:  "./testdata/testimage1.jpg",
         },
         &sreq.File{
-            FieldName: "testimage2",
-            FileName:  "testimage2.jpg",
+            FieldName: "image2",
             FilePath:  "./testdata/testimage2.jpg",
         },
     )).
@@ -206,7 +208,7 @@ fmt.Println(data)
 
 ```go
 sreq.SetDefaultRequestOpts(
-    sreq.WithParams(sreq.Value{
+    sreq.WithQuery(sreq.Value{
         "defaultKey1": "defaultValue1",
         "defaultKey2": "defaultValue2",
     }),
@@ -279,7 +281,7 @@ for i := 0; i < MaxWorker; i++ {
 
         data, err := sreq.
             Get("http://httpbin.org/get",
-                sreq.WithParams(params),
+                sreq.WithQuery(params),
                ).
             Text()
         if err != nil {

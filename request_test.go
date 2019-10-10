@@ -11,32 +11,6 @@ import (
 	"github.com/winterssy/sreq"
 )
 
-func TestRequest(t *testing.T) {
-	_, err := sreq.
-		Request("@", "httpbin.org/get").
-		EnsureStatusOk().
-		Text()
-	if err == nil {
-		t.Error("Request method unchecked")
-	}
-
-	_, err = sreq.
-		Request(sreq.MethodGet, "httpbin.org/get").
-		EnsureStatusOk().
-		Text()
-	if err == nil {
-		t.Error("Request url unchecked")
-	}
-
-	_, err = sreq.
-		Request(sreq.MethodGet, "http://httpbin.org/get").
-		EnsureStatusOk().
-		Text()
-	if err != nil {
-		t.Error(err)
-	}
-}
-
 func TestGet(t *testing.T) {
 	_, err := sreq.
 		Get("http://httpbin.org/get").
@@ -155,7 +129,33 @@ func TestTrace(t *testing.T) {
 	}
 }
 
-func TestWithParams(t *testing.T) {
+func TestRequest(t *testing.T) {
+	_, err := sreq.
+		Request("@", "httpbin.org/get").
+		EnsureStatusOk().
+		Text()
+	if err == nil {
+		t.Error("Request method unchecked")
+	}
+
+	_, err = sreq.
+		Request(sreq.MethodGet, "httpbin.org/get").
+		EnsureStatusOk().
+		Text()
+	if err == nil {
+		t.Error("Request url unchecked")
+	}
+
+	_, err = sreq.
+		Request(sreq.MethodGet, "http://httpbin.org/get").
+		EnsureStatusOk().
+		Text()
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestWithQuery(t *testing.T) {
 	type response struct {
 		Args map[string]string `json:"args"`
 	}
@@ -163,7 +163,7 @@ func TestWithParams(t *testing.T) {
 	resp := new(response)
 	err := sreq.
 		Get("http://httpbin.org/get",
-			sreq.WithParams(sreq.Value{
+			sreq.WithQuery(sreq.Value{
 				"key1": "value1",
 				"key2": "value2",
 			}),
@@ -175,55 +175,6 @@ func TestWithParams(t *testing.T) {
 	}
 	if resp.Args["key1"] != "value1" || resp.Args["key2"] != "value2" {
 		t.Error("Set params failed")
-	}
-}
-
-func TestWithForm(t *testing.T) {
-	type response struct {
-		Form map[string]string `json:"form"`
-	}
-
-	resp := new(response)
-	err := sreq.
-		Post("http://httpbin.org/post",
-			sreq.WithForm(sreq.Value{
-				"key1": "value1",
-				"key2": "value2",
-			}),
-		).
-		EnsureStatusOk().
-		JSON(resp)
-	if err != nil {
-		t.Error(err)
-	}
-	if resp.Form["key1"] != "value1" || resp.Form["key2"] != "value2" {
-		t.Error("Send form failed")
-	}
-}
-
-func TestWithJSON(t *testing.T) {
-	type response struct {
-		JSON struct {
-			Msg string `json:"msg"`
-			Num int    `json:"num"`
-		} `json:"json"`
-	}
-
-	resp := new(response)
-	err := sreq.
-		Post("http://httpbin.org/post",
-			sreq.WithJSON(sreq.Data{
-				"msg": "hello world",
-				"num": 2019,
-			}),
-		).
-		EnsureStatusOk().
-		JSON(resp)
-	if err != nil {
-		t.Error(err)
-	}
-	if resp.JSON.Msg != "hello world" || resp.JSON.Num != 2019 {
-		t.Error("Send json failed")
 	}
 }
 
@@ -305,50 +256,100 @@ func TestWithCookies(t *testing.T) {
 	}
 }
 
+func TestWithText(t *testing.T) {
+	type response struct {
+		Data string `json:"data"`
+	}
+
+	resp := new(response)
+	err := sreq.
+		Post("http://httpbin.org/post",
+			sreq.WithText("hello world"),
+		).
+		EnsureStatusOk().
+		JSON(resp)
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.Data != "hello world" {
+		t.Error("Send form failed")
+	}
+}
+
+func TestWithForm(t *testing.T) {
+	type response struct {
+		Form map[string]string `json:"form"`
+	}
+
+	resp := new(response)
+	err := sreq.
+		Post("http://httpbin.org/post",
+			sreq.WithForm(sreq.Value{
+				"key1": "value1",
+				"key2": "value2",
+			}),
+		).
+		EnsureStatusOk().
+		JSON(resp)
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.Form["key1"] != "value1" || resp.Form["key2"] != "value2" {
+		t.Error("Send form failed")
+	}
+}
+
+func TestWithJSON(t *testing.T) {
+	type response struct {
+		JSON struct {
+			Msg string `json:"msg"`
+			Num int    `json:"num"`
+		} `json:"json"`
+	}
+
+	resp := new(response)
+	err := sreq.
+		Post("http://httpbin.org/post",
+			sreq.WithJSON(sreq.Data{
+				"msg": "hello world",
+				"num": 2019,
+			}),
+		).
+		EnsureStatusOk().
+		JSON(resp)
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.JSON.Msg != "hello world" || resp.JSON.Num != 2019 {
+		t.Error("Send json failed")
+	}
+}
+
 func TestWithFiles(t *testing.T) {
 	_, err := sreq.
 		Post("http://httpbin.org/post",
 			sreq.WithFiles(
 				&sreq.File{
-					FieldName: "field1",
-					FileName:  "",
-					FilePath:  "./testdata/testfile1.txt",
+					FieldName: "file",
+					FilePath:  "./testdata/testfile.txt",
 				},
 			),
 		).
 		EnsureStatusOk().
 		Resolve()
 	if err == nil {
-		t.Error("Empty file name unchecked")
+		t.Error("File not exists unchecked")
 	}
 
 	_, err = sreq.
 		Post("http://httpbin.org/post",
 			sreq.WithFiles(
 				&sreq.File{
-					FieldName: "field1",
-					FileName:  "testfile1.txt",
-					FilePath:  "",
-				},
-			),
-		).
-		EnsureStatusOk().
-		Resolve()
-	if err == nil {
-		t.Error("Empty file path unchecked")
-	}
-
-	_, err = sreq.
-		Post("http://httpbin.org/post",
-			sreq.WithFiles(
-				&sreq.File{
-					FieldName: "field1",
-					FileName:  "testfile1.txt",
+					FieldName: "file1",
 					FilePath:  "./testdata/testfile1.txt",
 				},
 				&sreq.File{
-					FieldName: "field1",
-					FileName:  "testfile2.txt",
+					FieldName: "file1",
 					FilePath:  "./testdata/testfile2.txt",
 				},
 			),
@@ -367,13 +368,11 @@ func TestWithFiles(t *testing.T) {
 		Post("http://httpbin.org/post",
 			sreq.WithFiles(
 				&sreq.File{
-					FieldName: "field1",
-					FileName:  "testfile1.txt",
+					FieldName: "file1",
 					FilePath:  "./testdata/testfile1.txt",
 				},
 				&sreq.File{
-					FieldName: "field2",
-					FileName:  "testfile2.txt",
+					FieldName: "file2",
 					FilePath:  "./testdata/testfile2.txt",
 				},
 			),
@@ -383,7 +382,7 @@ func TestWithFiles(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if resp.Files["field1"] != "testfile1.txt" || resp.Files["field2"] != "testfile2.txt" {
+	if resp.Files["file1"] != "testfile1.txt" || resp.Files["file2"] != "testfile2.txt" {
 		t.Error("Upload files failed")
 	}
 }

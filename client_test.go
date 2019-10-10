@@ -29,7 +29,7 @@ func TestDefaultRequestOpts(t *testing.T) {
 	}
 
 	sreq.SetDefaultRequestOpts(
-		sreq.WithParams(sreq.Value{
+		sreq.WithQuery(sreq.Value{
 			"defaultKey1": "defaultValue1",
 		}),
 	)
@@ -46,7 +46,7 @@ func TestDefaultRequestOpts(t *testing.T) {
 	}
 
 	sreq.AddDefaultRequestOpts(
-		sreq.WithParams(sreq.Value{
+		sreq.WithQuery(sreq.Value{
 			"defaultKey2": "defaultValue2",
 		}),
 	)
