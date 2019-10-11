@@ -216,6 +216,23 @@ func WithQuery(params Params) RequestOption {
 	}
 }
 
+// WithRaw sets raw bytes payload of the HTTP request.
+func WithRaw(raw []byte, contentType string) RequestOption {
+	return func(hr *http.Request) (*http.Request, error) {
+		r := bytes.NewBuffer(raw)
+		hr.Body = ioutil.NopCloser(r)
+		hr.ContentLength = int64(r.Len())
+		buf := r.Bytes()
+		hr.GetBody = func() (io.ReadCloser, error) {
+			r := bytes.NewReader(buf)
+			return ioutil.NopCloser(r), nil
+		}
+
+		hr.Header.Set("Content-Type", contentType)
+		return hr, nil
+	}
+}
+
 // WithText sets plain text payload of the HTTP request.
 func WithText(text string) RequestOption {
 	return func(hr *http.Request) (*http.Request, error) {

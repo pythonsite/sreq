@@ -174,7 +174,7 @@ func TestWithQuery(t *testing.T) {
 		t.Fatal(err)
 	}
 	if resp.Args["key1"] != "value1" || resp.Args["key2"] != "value2" {
-		t.Error("Set params failed")
+		t.Error("Set params test failed")
 	}
 }
 
@@ -223,7 +223,7 @@ func TestWithHeaders(t *testing.T) {
 		t.Fatal(err)
 	}
 	if resp.Headers["Origin"] != "http://httpbin.org" || resp.Headers["Referer"] != "http://httpbin.org" {
-		t.Error("Set headers failed")
+		t.Error("Set headers test failed")
 	}
 }
 
@@ -252,7 +252,27 @@ func TestWithCookies(t *testing.T) {
 		t.Fatal(err)
 	}
 	if resp.Cookies["name1"] != "value1" || resp.Cookies["name2"] != "value2" {
-		t.Error("Set cookies failed")
+		t.Error("Set cookies test failed")
+	}
+}
+
+func TestWithRaw(t *testing.T) {
+	type response struct {
+		Data string `json:"data"`
+	}
+
+	resp := new(response)
+	err := sreq.
+		Post("http://httpbin.org/post",
+			sreq.WithRaw([]byte("hello world"), "text/plain"),
+		).
+		EnsureStatusOk().
+		JSON(resp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.Data != "hello world" {
+		t.Error("Send raw bytes test failed")
 	}
 }
 
@@ -272,7 +292,7 @@ func TestWithText(t *testing.T) {
 		t.Fatal(err)
 	}
 	if resp.Data != "hello world" {
-		t.Error("Send form failed")
+		t.Error("Send plain text test failed")
 	}
 }
 
@@ -295,7 +315,7 @@ func TestWithForm(t *testing.T) {
 		t.Fatal(err)
 	}
 	if resp.Form["key1"] != "value1" || resp.Form["key2"] != "value2" {
-		t.Error("Send form failed")
+		t.Error("Send form test failed")
 	}
 }
 
@@ -321,7 +341,7 @@ func TestWithJSON(t *testing.T) {
 		t.Fatal(err)
 	}
 	if resp.JSON.Msg != "hello world" || resp.JSON.Num != 2019 {
-		t.Error("Send json failed")
+		t.Error("Send json test failed")
 	}
 }
 
@@ -357,7 +377,7 @@ func TestWithFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 	if resp.Files["file1"] != "testfile1.txt" || resp.Files["file2"] != "testfile2.txt" {
-		t.Error("Upload files failed")
+		t.Error("Upload files test failed")
 	}
 }
 
@@ -378,7 +398,7 @@ func TestWithBasicAuth(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !resp.Authenticated || resp.User != "admin" {
-		t.Error("Set basic authentication failed")
+		t.Error("Set basic authentication test failed")
 	}
 }
 
@@ -399,7 +419,7 @@ func TestWithBearerToken(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !resp.Authenticated || resp.Token != "sreq" {
-		t.Error("Set bearer token failed")
+		t.Error("Set bearer token test failed")
 	}
 }
 
@@ -424,6 +444,6 @@ func TestWithContext(t *testing.T) {
 	}()
 
 	if resp := <-ch; resp.Err == nil || resp.R != nil {
-		t.Error("Set Context failed")
+		t.Error("Set Context test failed")
 	}
 }

@@ -56,7 +56,7 @@ func TestHeaders(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(h2, h1) {
-		t.Error("Headers test failed")
+		t.Error("Headers_String test failed")
 	}
 }
 
@@ -132,7 +132,7 @@ func TestFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(f2, f1) {
-		t.Error("Files test failed")
+		t.Error("Files_String test failed")
 	}
 }
 
