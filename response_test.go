@@ -109,3 +109,13 @@ func TestResponse_EnsureStatus(t *testing.T) {
 		t.Error("Response_EnsureStatus test failed")
 	}
 }
+
+func TestResponse_Save(t *testing.T) {
+	const testFileName = "testdata.json"
+	err := sreq.Get("http://httpbin.org/get").
+		EnsureStatusOk().
+		Save(testFileName)
+	if err != nil {
+		t.Error(err)
+	}
+}

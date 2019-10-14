@@ -3,8 +3,10 @@ package sreq
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 type (
@@ -66,7 +68,7 @@ func (r *Response) EnsureStatus2xx() *Response {
 		return r
 	}
 	if r.R.StatusCode/100 != 2 {
-		r.Err = fmt.Errorf("sreq: status code 2xx expected but got: %d", r.R.StatusCode)
+		r.Err = fmt.Errorf("sreq: bad status: %d", r.R.StatusCode)
 	}
 	return r
 }
@@ -77,7 +79,28 @@ func (r *Response) EnsureStatus(code int) *Response {
 		return r
 	}
 	if r.R.StatusCode != code {
-		r.Err = fmt.Errorf("sreq: status code %d expected but got: %d", code, r.R.StatusCode)
+		r.Err = fmt.Errorf("sreq: bad status: %d", r.R.StatusCode)
 	}
 	return r
+}
+
+// Save saves the HTTP response into a file.
+func (r *Response) Save(filename string) error {
+	if r.Err != nil {
+		return r.Err
+	}
+
+	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	defer r.R.Body.Close()
+
+	_, err = io.Copy(file, r.R.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
