@@ -144,7 +144,7 @@ data, err := sreq.
          sreq.WithJSON(sreq.JSON{
              "msg": "hello world",
              "num": 2019,
-         }),
+         }, true),
         ).
     Text()
 if err != nil {

@@ -1,6 +1,7 @@
 package sreq
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	urlpkg "net/url"
@@ -71,7 +72,7 @@ func (h Headers) Del(key string) {
 
 // String returns the JSON-encoded text representation of h.
 func (h Headers) String() string {
-	return ToJSON(h)
+	return toJSON(h)
 }
 
 // Get returns the value from a map by the given key.
@@ -116,7 +117,7 @@ func (j JSON) Del(key string) {
 
 // String returns the JSON-encoded text representation of j.
 func (j JSON) String() string {
-	return ToJSON(j)
+	return toJSON(j)
 }
 
 // Get returns the value from a map by the given key.
@@ -136,7 +137,7 @@ func (f Files) Del(key string) {
 
 // String returns the JSON-encoded text representation of f.
 func (f Files) String() string {
-	return ToJSON(f)
+	return toJSON(f)
 }
 
 // ExistsFile checks whether a file exists or not.
@@ -156,11 +157,19 @@ func ExistsFile(name string) (bool, error) {
 	return true, err
 }
 
-// ToJSON returns the JSON-encoded text representation of data.
-func ToJSON(data interface{}) string {
-	b, err := json.MarshalIndent(data, "", "\t")
+func toJSON(data interface{}) string {
+	b, err := Marshal(data, "", "\t", false)
 	if err != nil {
 		return "{}"
 	}
 	return string(b)
+}
+
+func Marshal(v interface{}, prefix string, indent string, escapeHTML bool) ([]byte, error) {
+	buf := &bytes.Buffer{}
+	encoder := json.NewEncoder(buf)
+	encoder.SetIndent(prefix, indent)
+	encoder.SetEscapeHTML(escapeHTML)
+	err := encoder.Encode(v)
+	return buf.Bytes(), err
 }

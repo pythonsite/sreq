@@ -17,7 +17,7 @@ func main() {
 	// setHeaders()
 	// setCookies()
 	// sendForm()
-	// sendJSON()
+	sendJSON()
 	// uploadFiles()
 	// setBasicAuth()
 	// setBearerToken()
@@ -98,7 +98,7 @@ func sendJSON() {
 			sreq.WithJSON(sreq.JSON{
 				"msg": "hello world",
 				"num": 2019,
-			}),
+			}, true),
 		).
 		Text()
 	if err != nil {

@@ -103,9 +103,9 @@ func TestJSON(t *testing.T) {
 		t.Error("JSON_Del test failed")
 	}
 
-	want := "{\n\t\"num\": 2019\n}"
+	want := "{\n\t\"num\": 2019\n}\n"
 	if got := j.String(); got != want {
-		t.Errorf("JSON_string got: %s, want: %s", got, want)
+		t.Errorf("JSON_string got: %q, want: %q", got, want)
 	}
 }
 
@@ -158,6 +158,40 @@ func TestExistsFile(t *testing.T) {
 	for _, test := range tests {
 		if got, _ := sreq.ExistsFile(test.name); got != test.want {
 			t.Error("ExistsFile test failed")
+		}
+	}
+}
+
+func TestMarshal(t *testing.T) {
+	tests := []struct {
+		data       map[string]string
+		escapeHTML bool
+		want       string
+	}{
+		{
+			data: map[string]string{
+				"param": "page=1&pagesize=100",
+			},
+			escapeHTML: true,
+			want:       "{\"param\":\"page=1\\u0026pagesize=100\"}\n",
+		},
+		{
+			data: map[string]string{
+				"param": "page=1&pagesize=100",
+			},
+			escapeHTML: false,
+			want:       "{\"param\":\"page=1&pagesize=100\"}\n",
+		},
+	}
+
+	for _, test := range tests {
+		b, err := sreq.Marshal(test.data, "", "", test.escapeHTML)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		if got := string(b); got != test.want {
+			t.Errorf("Marshal got: %q, want: %q", got, test.want)
 		}
 	}
 }

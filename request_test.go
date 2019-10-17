@@ -331,16 +331,33 @@ func TestWithJSON(t *testing.T) {
 	err := sreq.
 		Post("http://httpbin.org/post",
 			sreq.WithJSON(sreq.JSON{
-				"msg": "hello world",
+				"msg": "hi&hello",
 				"num": 2019,
-			}),
+			}, true),
 		).
 		EnsureStatusOk().
 		JSON(resp)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resp.JSON.Msg != "hello world" || resp.JSON.Num != 2019 {
+	if resp.JSON.Msg != "hi&hello" || resp.JSON.Num != 2019 {
+		t.Error("Send json test failed")
+	}
+
+	_resp := new(response)
+	err = sreq.
+		Post("http://httpbin.org/post",
+			sreq.WithJSON(sreq.JSON{
+				"msg": "hi&hello",
+				"num": 2019,
+			}, false),
+		).
+		EnsureStatusOk().
+		JSON(_resp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.JSON.Msg != "hi&hello" || resp.JSON.Num != 2019 {
 		t.Error("Send json test failed")
 	}
 }

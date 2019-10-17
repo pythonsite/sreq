@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -273,9 +272,9 @@ func WithForm(form Form) RequestOption {
 }
 
 // WithJSON sets json payload of the HTTP request.
-func WithJSON(data JSON) RequestOption {
+func WithJSON(data JSON, escapeHTML bool) RequestOption {
 	return func(hr *http.Request) (*http.Request, error) {
-		b, err := json.Marshal(data)
+		b, err := Marshal(data, "", "", escapeHTML)
 		if err != nil {
 			return nil, err
 		}
