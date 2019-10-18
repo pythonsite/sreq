@@ -10,7 +10,7 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
-	urlpkg "net/url"
+	stdurl "net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -252,7 +252,7 @@ func WithText(text string) RequestOption {
 // WithForm sets form payload of the HTTP request.
 func WithForm(form Form) RequestOption {
 	return func(hr *http.Request) (*http.Request, error) {
-		data := urlpkg.Values{}
+		data := stdurl.Values{}
 		for k, v := range form {
 			data.Set(k, v)
 		}

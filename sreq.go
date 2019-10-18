@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	urlpkg "net/url"
+	stdurl "net/url"
 	"os"
 )
 
@@ -48,7 +48,7 @@ func (p Params) Del(key string) {
 // String returns the``URL encoded'' form of p
 // ("bar=baz&foo=quux") sorted by key.
 func (p Params) String() string {
-	values := make(urlpkg.Values, len(p))
+	values := make(stdurl.Values, len(p))
 	for k, v := range p {
 		values.Set(k, v)
 	}
@@ -93,7 +93,7 @@ func (f Form) Del(key string) {
 // String returns the``URL encoded'' form of f
 // ("bar=baz&foo=quux") sorted by key.
 func (f Form) String() string {
-	values := make(urlpkg.Values, len(f))
+	values := make(stdurl.Values, len(f))
 	for k, v := range f {
 		values.Set(k, v)
 	}
