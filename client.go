@@ -21,9 +21,8 @@ type (
 	}
 )
 
-// New allows you to customize a sreq client with an HTTP client.
-// If the transport or timeout of the HTTP client not specified, sreq would use the default value.
-func New(httpClient *http.Client) *Client {
+// DefaultHTTPClient returns an HTTP client that sreq uses by default.
+func DefaultHTTPClient() *http.Client {
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
@@ -39,13 +38,17 @@ func New(httpClient *http.Client) *Client {
 		PublicSuffixList: publicsuffix.List,
 	})
 	timeout := 120 * time.Second
-
-	hc := &http.Client{
+	return &http.Client{
 		Transport: transport,
 		Jar:       jar,
 		Timeout:   timeout,
 	}
+}
 
+// New allows you to customize a sreq client with an HTTP client.
+// If the transport or timeout of the HTTP client not specified, sreq would use the default value.
+func New(httpClient *http.Client) *Client {
+	hc := DefaultHTTPClient()
 	if httpClient != nil {
 		if httpClient.Transport != nil {
 			hc.Transport = httpClient.Transport
