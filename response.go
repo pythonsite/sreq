@@ -57,6 +57,21 @@ func (r *Response) JSON(v interface{}) error {
 	return json.NewDecoder(r.R.Body).Decode(v)
 }
 
+// Cookie returns the HTTP response cookie by name.
+func (r *Response) Cookie(name string) *http.Cookie {
+	if r.Err != nil {
+		return nil
+	}
+
+	for _, c := range r.R.Cookies() {
+		if c.Name == name {
+			return c
+		}
+	}
+
+	return nil
+}
+
 // EnsureStatusOk ensures the HTTP response's status code of r must be 200.
 func (r *Response) EnsureStatusOk() *Response {
 	return r.EnsureStatus(http.StatusOK)

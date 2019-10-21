@@ -56,6 +56,24 @@ func TestResponse_Text(t *testing.T) {
 	}
 }
 
+func TestResponse_Cookie(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{
+			Name:  "uid",
+			Value: "10086",
+		})
+	}))
+	defer ts.Close()
+
+	cookie := sreq.
+		Get(ts.URL).
+		EnsureStatusOk().
+		Cookie("uid")
+	if cookie == nil || cookie.Name != "uid" {
+		t.Error("Response_Cookie test failed")
+	}
+}
+
 func TestResponse_EnsureStatus(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
