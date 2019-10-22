@@ -65,11 +65,14 @@ func TestResponse_Cookie(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	cookie := sreq.
+	cookie, err := sreq.
 		Get(ts.URL).
 		EnsureStatusOk().
 		Cookie("uid")
-	if cookie == nil || cookie.Name != "uid" {
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cookie.Name != "uid" {
 		t.Error("Response_Cookie test failed")
 	}
 }

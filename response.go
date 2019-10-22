@@ -2,6 +2,7 @@ package sreq
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -58,18 +59,18 @@ func (r *Response) JSON(v interface{}) error {
 }
 
 // Cookie returns the HTTP response cookie by name.
-func (r *Response) Cookie(name string) *http.Cookie {
+func (r *Response) Cookie(name string) (*http.Cookie, error) {
 	if r.Err != nil {
-		return nil
+		return nil, r.Err
 	}
 
 	for _, c := range r.R.Cookies() {
 		if c.Name == name {
-			return c
+			return c, nil
 		}
 	}
 
-	return nil
+	return nil, errors.New("sreq: named cookie not present")
 }
 
 // EnsureStatusOk ensures the HTTP response's status code of r must be 200.
