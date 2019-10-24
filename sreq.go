@@ -165,6 +165,7 @@ func toJSON(data interface{}) string {
 	return string(b)
 }
 
+// Marshal returns the JSON encoding of v.
 func Marshal(v interface{}, prefix string, indent string, escapeHTML bool) ([]byte, error) {
 	buf := &bytes.Buffer{}
 	encoder := json.NewEncoder(buf)
