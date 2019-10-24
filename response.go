@@ -97,7 +97,7 @@ func (r *Response) Save(filename string) error {
 		return r.Err
 	}
 
-	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0755)
+	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0664)
 	if err != nil {
 		return err
 	}
