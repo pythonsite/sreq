@@ -17,7 +17,7 @@ func main() {
 	// setHeaders()
 	// setCookies()
 	// sendForm()
-	sendJSON()
+	// sendJSON()
 	// uploadFiles()
 	// setBasicAuth()
 	// setBearerToken()

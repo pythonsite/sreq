@@ -75,3 +75,11 @@ func TestDefaultRequestOpts(t *testing.T) {
 		t.Error("Clear default HTTP request options test failed")
 	}
 }
+
+func TestSend(t *testing.T) {
+	httpReq, _ := http.NewRequest("GET", "http://httpbin.org/get", nil)
+	_, err := sreq.Send(httpReq).EnsureStatusOk().Resolve()
+	if err != nil {
+		t.Error(err)
+	}
+}

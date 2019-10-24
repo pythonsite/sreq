@@ -101,3 +101,17 @@ func (c *Client) ClearDefaultRequestOpts() {
 	c.defaultRequestOpts = nil
 	c.mux.Unlock()
 }
+
+// Send sends an HTTP request and returns response using the default sreq client.
+func Send(httpReq *http.Request) *Response {
+	return std.Send(httpReq)
+}
+
+// Send sends an HTTP request and returns response using c.
+func (c *Client) Send(httpReq *http.Request) *Response {
+	httpResp, err := c.httpClient.Do(httpReq)
+	return &Response{
+		R:   httpResp,
+		Err: err,
+	}
+}

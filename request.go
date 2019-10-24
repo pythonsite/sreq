@@ -175,14 +175,7 @@ func (c *Client) Request(method string, url string, opts ...RequestOption) *Resp
 		}
 	}
 
-	httpResp, err := c.httpClient.Do(httpReq)
-	if err != nil {
-		resp.Err = err
-		return resp
-	}
-
-	resp.R = httpResp
-	return resp
+	return c.Send(httpReq)
 }
 
 // WithHost specifies the host on which the URL is sought.
@@ -299,7 +292,7 @@ func WithFiles(files Files) RequestOption {
 		for fieldName, filePath := range files {
 			if ok, err := ExistsFile(filePath); err != nil {
 				if !ok {
-					return nil, fmt.Errorf("sreq: unexpected file path of %q: %s", fieldName, err.Error())
+					return nil, fmt.Errorf("sreq: unexpected file path of %q: %v", fieldName, err)
 				}
 			}
 		}

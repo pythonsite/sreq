@@ -30,22 +30,13 @@ func (r *Response) Raw() ([]byte, error) {
 	}
 	defer r.R.Body.Close()
 
-	b, err := ioutil.ReadAll(r.R.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return b, nil
+	return ioutil.ReadAll(r.R.Body)
 }
 
 // Text decodes the HTTP response body of r and returns the text representation of its raw data.
 func (r *Response) Text() (string, error) {
 	b, err := r.Raw()
-	if err != nil {
-		return "", err
-	}
-
-	return string(b), nil
+	return string(b), err
 }
 
 // JSON decodes the HTTP response body of r and unmarshals its JSON-encoded data into v.
@@ -114,9 +105,5 @@ func (r *Response) Save(filename string) error {
 	defer r.R.Body.Close()
 
 	_, err = io.Copy(file, r.R.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
