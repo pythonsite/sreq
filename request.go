@@ -50,102 +50,102 @@ type (
 	RequestOption func(*http.Request) (*http.Request, error)
 )
 
-// Get makes GET HTTP requests using the default sreq client.
+// Get makes a GET HTTP request.
 func Get(url string, opts ...RequestOption) *Response {
 	return std.Get(url, opts...)
 }
 
-// Get makes GET HTTP requests using c.
+// Get makes a GET HTTP request.
 func (c *Client) Get(url string, opts ...RequestOption) *Response {
 	return c.Request(MethodGet, url, opts...)
 }
 
-// Head makes HEAD HTTP requests using the default sreq client.
+// Head makes a HEAD HTTP request.
 func Head(url string, opts ...RequestOption) *Response {
 	return std.Head(url, opts...)
 }
 
-// Head makes HEAD HTTP requests using c.
+// Head makes a HEAD HTTP request.
 func (c *Client) Head(url string, opts ...RequestOption) *Response {
 	return c.Request(MethodHead, url, opts...)
 }
 
-// Post makes POST HTTP requests using the default sreq client.
+// Post makes a POST HTTP request.
 func Post(url string, opts ...RequestOption) *Response {
 	return std.Post(url, opts...)
 }
 
-// Post makes POST HTTP requests using c.
+// Post makes a POST HTTP request.
 func (c *Client) Post(url string, opts ...RequestOption) *Response {
 	return c.Request(MethodPost, url, opts...)
 }
 
-// Put makes PUT HTTP requests using the default sreq client.
+// Put makes a PUT HTTP request.
 func Put(url string, opts ...RequestOption) *Response {
 	return std.Put(url, opts...)
 }
 
-// Put makes PUT HTTP requests using c.
+// Put makes a PUT HTTP request.
 func (c *Client) Put(url string, opts ...RequestOption) *Response {
 	return std.Request(MethodPut, url, opts...)
 }
 
-// Patch makes PATCH HTTP requests using the default sreq client.
+// Patch makes a PATCH HTTP request.
 func Patch(url string, opts ...RequestOption) *Response {
 	return std.Patch(url, opts...)
 }
 
-// Patch makes PATCH HTTP requests using c.
+// Patch makes a PATCH HTTP request.
 func (c *Client) Patch(url string, opts ...RequestOption) *Response {
 	return c.Request(MethodPatch, url, opts...)
 }
 
-// Delete makes DELETE HTTP requests using the default sreq client.
+// Delete makes a DELETE HTTP request.
 func Delete(url string, opts ...RequestOption) *Response {
 	return std.Delete(url, opts...)
 }
 
-// Delete makes DELETE HTTP requests using c.
+// Delete makes a DELETE HTTP request.
 func (c *Client) Delete(url string, opts ...RequestOption) *Response {
 	return c.Request(MethodDelete, url, opts...)
 }
 
-// Connect makes CONNECT HTTP requests using the default sreq client.
+// Connect makes a CONNECT HTTP request.
 func Connect(url string, opts ...RequestOption) *Response {
 	return std.Connect(url, opts...)
 }
 
-// Connect makes CONNECT HTTP requests using c.
+// Connect makes a CONNECT HTTP request.
 func (c *Client) Connect(url string, opts ...RequestOption) *Response {
 	return c.Request(MethodConnect, url, opts...)
 }
 
-// Options makes GET OPTIONS request using the default sreq client.
+// Options makes an OPTIONS request.
 func Options(url string, opts ...RequestOption) *Response {
 	return std.Options(url, opts...)
 }
 
-// Options makes GET OPTIONS request using c.
+// Options makes an OPTIONS request.
 func (c *Client) Options(url string, opts ...RequestOption) *Response {
 	return c.Request(MethodOptions, url, opts...)
 }
 
-// Trace makes TRACE HTTP requests using the default sreq client.
+// Trace makes a TRACE HTTP request.
 func Trace(url string, opts ...RequestOption) *Response {
 	return std.Trace(url, opts...)
 }
 
-// Trace makes TRACE HTTP requests using c.
+// Trace makes a TRACE HTTP request.
 func (c *Client) Trace(url string, opts ...RequestOption) *Response {
 	return c.Request(MethodTrace, url, opts...)
 }
 
-// Request makes HTTP requests using the default sreq client.
+// Request makes an HTTP request using a specified method.
 func Request(method string, url string, opts ...RequestOption) *Response {
 	return std.Request(method, url, opts...)
 }
 
-// Request makes HTTP requests using c.
+// Request makes an HTTP request using a specified method.
 func (c *Client) Request(method string, url string, opts ...RequestOption) *Response {
 	resp := new(Response)
 	httpReq, err := http.NewRequest(method, url, nil)
@@ -157,7 +157,7 @@ func (c *Client) Request(method string, url string, opts ...RequestOption) *Resp
 	httpReq.Header.Set("User-Agent", "sreq "+Version)
 
 	c.mux.RLock()
-	for _, opt := range c.defaultRequestOpts {
+	for _, opt := range c.RequestOptions {
 		httpReq, err = opt(httpReq)
 		if err != nil {
 			c.mux.RUnlock()

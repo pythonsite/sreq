@@ -15,9 +15,13 @@ var std = New(nil)
 type (
 	// Client defines a sreq client and will be reused for per request.
 	Client struct {
-		httpClient         *http.Client
-		defaultRequestOpts []RequestOption
-		mux                *sync.RWMutex
+		// C specifies an HTTP client for sending HTTP requests.
+		C *http.Client
+
+		// RequestOptions specifies request options that sreq uses for per HTTP request by default.
+		RequestOptions []RequestOption
+
+		mux sync.RWMutex
 	}
 )
 
@@ -46,7 +50,7 @@ func DefaultHTTPClient() *http.Client {
 }
 
 // New allows you to customize a sreq client with an HTTP client.
-// If the transport or timeout of the HTTP client not specified, sreq would use the default value.
+// If the transport or timeout of the HTTP client not specified, sreq would use defaults.
 func New(httpClient *http.Client) *Client {
 	hc := DefaultHTTPClient()
 	if httpClient != nil {
@@ -61,55 +65,54 @@ func New(httpClient *http.Client) *Client {
 	}
 
 	return &Client{
-		httpClient: hc,
-		mux:        new(sync.RWMutex),
+		C: hc,
 	}
 }
 
-// SetDefaultRequestOpts sets std's default request options for per HTTP request.
+// SetDefaultRequestOpts sets default request options for per HTTP request.
 func SetDefaultRequestOpts(opts ...RequestOption) {
 	std.SetDefaultRequestOpts(opts...)
 }
 
-// SetDefaultRequestOpts sets c's default request options for per HTTP request.
+// SetDefaultRequestOpts sets default request options for per HTTP request.
 func (c *Client) SetDefaultRequestOpts(opts ...RequestOption) {
 	c.mux.Lock()
-	c.defaultRequestOpts = opts
+	c.RequestOptions = opts
 	c.mux.Unlock()
 }
 
-// AddDefaultRequestOpts appends std's default request options for per HTTP request.
+// AddDefaultRequestOpts appends default request options for per HTTP request.
 func AddDefaultRequestOpts(opts ...RequestOption) {
 	std.AddDefaultRequestOpts(opts...)
 }
 
-// AddDefaultRequestOpts appends c's default request options for per HTTP request.
+// AddDefaultRequestOpts appends default request options for per HTTP request.
 func (c *Client) AddDefaultRequestOpts(opts ...RequestOption) {
 	c.mux.Lock()
-	c.defaultRequestOpts = append(c.defaultRequestOpts, opts...)
+	c.RequestOptions = append(c.RequestOptions, opts...)
 	c.mux.Unlock()
 }
 
-// ClearDefaultRequestOpts clears std's default request options for per HTTP request.
+// ClearDefaultRequestOpts clears default request options for per HTTP request.
 func ClearDefaultRequestOpts() {
 	std.ClearDefaultRequestOpts()
 }
 
-// ClearDefaultRequestOpts clears c's default request options for per HTTP request.
+// ClearDefaultRequestOpts clears default request options for per HTTP request.
 func (c *Client) ClearDefaultRequestOpts() {
 	c.mux.Lock()
-	c.defaultRequestOpts = nil
+	c.RequestOptions = nil
 	c.mux.Unlock()
 }
 
-// Send sends an HTTP request and returns response using the default sreq client.
+// Send sends an HTTP request and returns its response.
 func Send(httpReq *http.Request) *Response {
 	return std.Send(httpReq)
 }
 
-// Send sends an HTTP request and returns response using c.
+// Send sends an HTTP request and returns its response.
 func (c *Client) Send(httpReq *http.Request) *Response {
-	httpResp, err := c.httpClient.Do(httpReq)
+	httpResp, err := c.C.Do(httpReq)
 	return &Response{
 		R:   httpResp,
 		Err: err,
