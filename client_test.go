@@ -86,7 +86,21 @@ func TestFilterCookies(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	_, err := sreq.
+	req := sreq.New(&http.Client{})
+	_, err := req.
+		Get(ts.URL).
+		EnsureStatusOk().
+		Resolve()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = req.FilterCookies(ts.URL)
+	if err == nil {
+		t.Error("Nil cookie jar unchecked")
+	}
+
+	_, err = sreq.
 		Get(ts.URL).
 		EnsureStatusOk().
 		Resolve()

@@ -114,11 +114,14 @@ func FilterCookies(url string) ([]*http.Cookie, error) {
 
 // FilterCookies returns the cookies to send in a request for the given URL.
 func (c *Client) FilterCookies(url string) ([]*http.Cookie, error) {
+	if c.C.Jar == nil {
+		return nil, errors.New("sreq: nil cookie jar")
+	}
+
 	u, err := stdurl.Parse(url)
 	if err != nil {
 		return nil, err
 	}
-
 	cookies := c.C.Jar.Cookies(u)
 	if len(cookies) == 0 {
 		return nil, errors.New("sreq: cookies for the given URL not present")
