@@ -2,6 +2,7 @@ package sreq_test
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -73,6 +74,65 @@ func TestDefaultRequestOpts(t *testing.T) {
 	}
 	if len(respClear.Args) != 0 {
 		t.Error("Clear default HTTP request options test failed")
+	}
+}
+
+func TestFilterCookies(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{
+			Name:  "uid",
+			Value: "10086",
+		})
+	}))
+	defer ts.Close()
+
+	_, err := sreq.
+		Get(ts.URL).
+		EnsureStatusOk().
+		Resolve()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = sreq.FilterCookies(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = sreq.FilterCookies("https://www.google.com")
+	if err == nil {
+		t.Error("FilterCookies test failed")
+	}
+}
+
+func TestFilterCookie(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{
+			Name:  "uid",
+			Value: "10086",
+		})
+	}))
+	defer ts.Close()
+
+	_, err := sreq.
+		Get(ts.URL).
+		EnsureStatusOk().
+		Resolve()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cookie, err := sreq.FilterCookie(ts.URL, "uid")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cookie.Value != "10086" {
+		t.Error("FilterCookie test failed")
+	}
+
+	_, err = sreq.FilterCookie(ts.URL, "uuid")
+	if err == nil {
+		t.Error("FilterCookie test failed")
 	}
 }
 

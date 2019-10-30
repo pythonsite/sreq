@@ -1,9 +1,11 @@
 package sreq
 
 import (
+	"errors"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
+	stdurl "net/url"
 	"sync"
 	"time"
 
@@ -103,6 +105,47 @@ func (c *Client) ClearDefaultRequestOpts() {
 	c.mux.Lock()
 	c.RequestOptions = nil
 	c.mux.Unlock()
+}
+
+// FilterCookies returns the cookies to send in a request for the given URL.
+func FilterCookies(url string) ([]*http.Cookie, error) {
+	return std.FilterCookies(url)
+}
+
+// FilterCookies returns the cookies to send in a request for the given URL.
+func (c *Client) FilterCookies(url string) ([]*http.Cookie, error) {
+	u, err := stdurl.Parse(url)
+	if err != nil {
+		return nil, err
+	}
+
+	cookies := c.C.Jar.Cookies(u)
+	if len(cookies) == 0 {
+		return nil, errors.New("sreq: cookies for the given URL not present")
+	}
+
+	return cookies, nil
+}
+
+// FilterCookie returns the named cookie to send in a request for the given URL.
+func FilterCookie(url string, name string) (*http.Cookie, error) {
+	return std.FilterCookie(url, name)
+}
+
+// FilterCookie returns the named cookie to send in a request for the given URL.
+func (c *Client) FilterCookie(url string, name string) (*http.Cookie, error) {
+	cookies, err := c.FilterCookies(url)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, cookie := range cookies {
+		if cookie.Name == name {
+			return cookie, nil
+		}
+	}
+
+	return nil, errors.New("sreq: named cookie for the given URL not present")
 }
 
 // Send sends an HTTP request and returns its response.
