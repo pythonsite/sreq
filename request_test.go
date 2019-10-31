@@ -366,14 +366,25 @@ func TestWithFiles(t *testing.T) {
 	_, err := sreq.
 		Post("http://httpbin.org/post",
 			sreq.WithFiles(sreq.Files{
-				"file": "./testdata/testfile.txt",
-			},
-			),
+				"file": "./testdata/file_does_not_exist.txt",
+			}),
 		).
 		EnsureStatusOk().
 		Resolve()
 	if err == nil {
-		t.Error("File not exists unchecked")
+		t.Error("Nonexistent file unchecked")
+	}
+
+	_, err = sreq.
+		Post("http://httpbin.org/post",
+			sreq.WithFiles(sreq.Files{
+				"file": "./testdata",
+			}),
+		).
+		EnsureStatusOk().
+		Resolve()
+	if err == nil {
+		t.Error("Directory unchecked")
 	}
 
 	type response struct {
@@ -385,8 +396,7 @@ func TestWithFiles(t *testing.T) {
 			sreq.WithFiles(sreq.Files{
 				"file1": "./testdata/testfile1.txt",
 				"file2": "./testdata/testfile2.txt",
-			},
-			),
+			}),
 		).
 		EnsureStatusOk().
 		JSON(resp)

@@ -141,11 +141,11 @@ func (f Files) String() string {
 }
 
 // ExistsFile checks whether a file exists or not.
-func ExistsFile(name string) (bool, error) {
-	fi, err := os.Stat(name)
+func ExistsFile(filename string) (bool, error) {
+	fi, err := os.Stat(filename)
 	if err == nil {
 		if fi.Mode().IsDir() {
-			return false, fmt.Errorf("%q is a directory", name)
+			return false, fmt.Errorf("%q is a directory", filename)
 		}
 		return true, nil
 	}

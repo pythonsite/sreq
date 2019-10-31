@@ -290,10 +290,8 @@ func WithJSON(data JSON, escapeHTML bool) RequestOption {
 func WithFiles(files Files) RequestOption {
 	return func(hr *http.Request) (*http.Request, error) {
 		for fieldName, filePath := range files {
-			if ok, err := ExistsFile(filePath); err != nil {
-				if !ok {
-					return nil, fmt.Errorf("sreq: unexpected file path of %q: %v", fieldName, err)
-				}
+			if _, err := ExistsFile(filePath); err != nil {
+				return nil, fmt.Errorf("sreq: file for %q not ready: %v", fieldName, err)
 			}
 		}
 
