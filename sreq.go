@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	stdurl "net/url"
 	"os"
+	"sort"
+	"strings"
 )
 
 const (
@@ -45,14 +46,10 @@ func (p Params) Del(key string) {
 	delete(p, key)
 }
 
-// String returns the``URL encoded'' form of p
+// String returns the``URL encoded'' form without escaping of p
 // ("bar=baz&foo=quux") sorted by key.
 func (p Params) String() string {
-	values := make(stdurl.Values, len(p))
-	for k, v := range p {
-		values.Set(k, v)
-	}
-	return values.Encode()
+	return encode(p)
 }
 
 // Get returns the value from a map by the given key.
@@ -90,14 +87,10 @@ func (f Form) Del(key string) {
 	delete(f, key)
 }
 
-// String returns the``URL encoded'' form of f
+// String returns the``URL encoded'' form without escaping of f
 // ("bar=baz&foo=quux") sorted by key.
 func (f Form) String() string {
-	values := make(stdurl.Values, len(f))
-	for k, v := range f {
-		values.Set(k, v)
-	}
-	return values.Encode()
+	return encode(f)
 }
 
 // Get returns the value from a map by the given key.
@@ -155,6 +148,26 @@ func ExistsFile(filename string) (bool, error) {
 	}
 
 	return true, err
+}
+
+func encode(v map[string]string) string {
+	keys := make([]string, 0, len(v))
+	for k := range v {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var sb strings.Builder
+	for _, k := range keys {
+		if sb.Len() > 0 {
+			sb.WriteString("&")
+		}
+		sb.WriteString(k)
+		sb.WriteString("=")
+		sb.WriteString(v[k])
+	}
+
+	return sb.String()
 }
 
 func toJSON(data interface{}) string {
