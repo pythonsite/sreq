@@ -31,6 +31,14 @@ func TestParams(t *testing.T) {
 	if got := p.String(); got != want {
 		t.Errorf("Params_String got: %s, want: %s", got, want)
 	}
+
+	p = sreq.Params{
+		"e": "user/pass",
+	}
+	want = "e=user%2Fpass"
+	if got := p.Encode(); got != want {
+		t.Errorf("Params_Encode got: %s, want: %s", got, want)
+	}
 }
 
 func TestHeaders(t *testing.T) {
@@ -82,6 +90,16 @@ func TestForm(t *testing.T) {
 	want := "key2=value2&key3=value3"
 	if got := f.String(); got != want {
 		t.Errorf("Form_String got: %s, want: %s", got, want)
+	}
+
+	f = sreq.Form{
+		"q":      "Go语言",
+		"offset": "0",
+		"limit":  "100",
+	}
+	want = "limit=100&offset=0&q=Go%E8%AF%AD%E8%A8%80"
+	if got := f.Encode(); got != want {
+		t.Errorf("Form_Encode got: %s, want: %s", got, want)
 	}
 }
 

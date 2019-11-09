@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	stdurl "net/url"
 	"os"
 	"sort"
 	"strings"
@@ -46,10 +47,14 @@ func (p Params) Del(key string) {
 	delete(p, key)
 }
 
-// String returns the``URL encoded'' form without escaping of p
-// ("bar=baz&foo=quux") sorted by key.
+// Encode encodes p into URL-escaped form sorted by key.
+func (p Params) Encode() string {
+	return urlEncode(p, true)
+}
+
+// String encodes p into URL-unescaped form sorted by key.
 func (p Params) String() string {
-	return encode(p)
+	return urlEncode(p, false)
 }
 
 // Get returns the value from a map by the given key.
@@ -87,10 +92,14 @@ func (f Form) Del(key string) {
 	delete(f, key)
 }
 
-// String returns the``URL encoded'' form without escaping of f
-// ("bar=baz&foo=quux") sorted by key.
+// Encode encodes f into URL-escaped form sorted by key.
+func (f Form) Encode() string {
+	return urlEncode(f, true)
+}
+
+// String encodes f into URL-unescaped form sorted by key.
 func (f Form) String() string {
-	return encode(f)
+	return urlEncode(f, false)
 }
 
 // Get returns the value from a map by the given key.
@@ -150,7 +159,7 @@ func ExistsFile(filename string) (bool, error) {
 	return true, err
 }
 
-func encode(v map[string]string) string {
+func urlEncode(v map[string]string, escape bool) string {
 	keys := make([]string, 0, len(v))
 	for k := range v {
 		keys = append(keys, k)
@@ -162,9 +171,20 @@ func encode(v map[string]string) string {
 		if sb.Len() > 0 {
 			sb.WriteString("&")
 		}
-		sb.WriteString(k)
+
+		if escape {
+			sb.WriteString(stdurl.QueryEscape(k))
+		} else {
+			sb.WriteString(k)
+		}
+
 		sb.WriteString("=")
-		sb.WriteString(v[k])
+
+		if escape {
+			sb.WriteString(stdurl.QueryEscape(v[k]))
+		} else {
+			sb.WriteString(v[k])
+		}
 	}
 
 	return sb.String()
